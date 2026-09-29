@@ -1,125 +1,100 @@
-
-from anthropic import APIStatusError, APITimeoutError, RateLimitError
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
-
-import agent
-
-# import knowledge
 import knowledge_store as knowledge
+from anthropic import APIStatusError,APITimeoutError,RateLimitError
 import llm
 
-# our relevance floor
-# Below this we treat the retrieved context as not actually relevant
+
+# Relevance floor
+# below this we treat the retrived context as not relevance
 RELEVANCE_FLOOR = 0.35
 
-router = APIRouter(prefix="/knowledge",tags=["knowledge"])
+router = APIRouter(prefix="/knowledge", tags=["knowledge"])
 
 class Question(BaseModel):
-    question : str = Field(min_length=3)
-    top_k : int = Field(default=3, gt=0, le=8)
+    question:str = Field(min_length=3)
+    top_k:int = Field(default=3, gt=0, lt=8)
 
-# POST does something, GET only retrieves. Here POST builds the index and sends real tokens with a cost.    
-# POST because it acts
 @router.post("/index")
 def rebuild_index():
-    """Embed the corpus. Costs tokens... so it is a deliberate POST, rather than automatic"""
+    """
+    embed the corpus, costs tokens so it is a deliberate POST rather than embeded in the application
+    """
     tokens = knowledge.build_index()
-    return {"indexed" : knowledge.count(), "embedding_tokens" : tokens}
+    return {"indexed": knowledge.count(), "embeddings_tokens": tokens}
 
-# POST because it needs to carry data in a response body. GET requests are not meant to take a request body by convention.
 @router.post("/search")
-def get_docs(question : Question):
-    """Retrieval only... no model call or generated text etc... only what was found"""
+def search_query(query: Question):
     try:
-        return {
-            "question" : question.question, 
-            "results" : knowledge.search(question.question, question.top_k)
-        }
+        return knowledge.search(query.question, query.top_k)
     except RuntimeError as e:
-        raise HTTPException(status_code= 409, detail = str(e))
-    
-# Function behaviour
-    # Refusal - Happens before the model is called not after
-    # Why 200 and not a 404 for refusal???
-    # the request was valid... service handles it correctly and "we have no relevant document is a real answer"
-# sources...
-    # this makes our answer checkable... without it a client has an answer/para that they have HAVE to trust... with it they can open doc-004 and verify the claim themselves
-# same error mapping as before
-    # 504, 429, 502 ... never a bare 500
+        raise HTTPException(status_code=409, detail=str(e))
+
+
+# function behaviour...
+    # the refusal happens before the model is called, not after
+    # why 200 and not a 404 for a refusal???
+        # the request was valid... service handled it correctly and "we have no relevant document" is a real answer
+    # sources...
+        # this makes our answer checkable.... without it a client has an answer/para that they HAVE to trust.... with it they can open doc-004 and verify the claim themselves
+    # same error mapping as before
+        # 504, 429, 502.... never a bare 500
 @router.post("/ask")
-def ask(q : Question):
-    """Retrieve, then answer using only what was retrieved... or refuse"""
+def ask(q:Question):
+    "Retieve, then answer using only what was retrieved ... or refuse"
     # 1. Retrieve
     # same call as /knowledge/search
     try:
         hits = knowledge.search(q.question, q.top_k)
-        
     except RuntimeError as e:
-        raise HTTPException(status_code= 409, detail = str(e))
+        raise HTTPException(status_code=409, detail=str(e))
     
-    
-    # 2. Filter, and decide whether to make a call to the model at all.
-    # compare against our RELEVANCE_FLOOR
+    # 2. Filter, and decide whether to make a call to the model at all
+    # (compare against the RELEVANCE_FLOOR)
     usable = [hit for hit in hits if hit["score"] >= RELEVANCE_FLOOR]
-    
+
     if not usable:
         return {
-            "question" : q.question,
-            "answer" : None,
-            "refused" : True,
-            "reason" : "No document in the corpus is relevant to that question.",
-            "sources" : []
+            "question": q.question,
+            "answer": None,
+            "refused": True,
+            "reason": "No documnet in the corpus is relevant to the question.",
+            "sources": []
         }
-    
-    # 3. Generation, Build context and generate the answer
-    context = "\n\n".join(f"[{h['id']}] {h['title']}\n{h['text']}" for h in usable)
-    print(len(context), repr(context[:100]))
-    
+    # 3. Build context and generate the answer
+    context = "\n\n".join( f"{ hit['id']}, {hit['title']}\n{hit['text']}" for hit in usable)
+    # 4. Return the successful answer 
     try:
-        result = llm.answer_from_context(q.question,context=context)
+        result = llm.answer_from_context(q.question, context)
+
     except APITimeoutError as e:
-        print(e.message)
-        raise HTTPException(status_code = 504, detail = "Answer provider timed out")
+        print("Anthropic timeout:", repr(e))
+        raise HTTPException(
+            status_code=504,
+            detail="Answer provider timed out" 
+        )
+
     except RateLimitError as e:
-        print(e.message)
-        raise HTTPException(status_code = 429, detail = "Answer provider rate limited")
+        print("Anthropic rate limit:", repr(e))
+        raise HTTPException(
+            status_code=429,
+            detail="Answer provider rate limit exceeded"
+        )
+
     except APIStatusError as e:
-        print(e.message)
-        raise HTTPException(status_code = 502, detail = "Answer provider unavailable")
-        
-    # Structure format if the output will be given to another application
-    # 4. Return the succesful answer
-    # Natural language when the output will be given to a person.
+        print("Anthropic API status error:", repr(e))
+        raise HTTPException(
+            status_code=502,
+            detail=str(e)
+        )
+
     return {
-            "question" : q.question,
-            "answer" : result["answer"],
-            "refused" : False,
-            "reason" : None,
-            "sources" : [{"id" : h["id"], 
-                          "title" : h["title"], 
-                          "score" : round(h["score"],3)} for h in usable],
-            "input_tokens" : result["input_tokens"], 
-            "output_tokens" : result["output_tokens"], 
-            "stop_reason" : result["stop_reason"]
+            "question": q.question,
+            "answer": result["answer"],
+            "refused": False,
+            "sources": [{"id":hit["id"], "title":hit["title"], "score":hit["score"]} for hit in usable],
+            "input_tokens": result["input_tokens"],
+            "output_tokens": result["output_tokens"],
+            "stop_reason": result["stop_reason"]
+
     }
-
-
-@router.post("/ask_with_tools")
-def ask_with_tools(q: Question):
-    try:
-        result = agent.ask_with_tools(q.question)
-    except RuntimeError as e:
-        print(e)
-        raise HTTPException(status_code = 401, detail = "Something went wrong.")
-    except APITimeoutError as e:
-        print(e.message)
-        raise HTTPException(status_code = 504, detail = "Answer provider timed out")
-    except RateLimitError as e:
-        print(e.message)
-        raise HTTPException(status_code = 429, detail = "Answer provider rate limited")
-    except APIStatusError as e:
-        print(e.message)
-        raise HTTPException(status_code = 502, detail = "Answer provider unavailable")
-    
-    return result

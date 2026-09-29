@@ -1,15 +1,22 @@
+from dotenv import load_dotenv
+
+load_dotenv(".env.local")
+
 from fastapi import FastAPI
+from routers.firms import router as firms_router
+from routers.people import router as people_router
+from routers.insights import router as insights_router
+from routers.knowledge import router as knowledge_router
+from routers.agent import router as agent_router
 
-from routers import firms, insights, knowledge, people, reports
+app = FastAPI(title="Firm Inteligence API")
 
-app = FastAPI(title="Firm Intelligence API")
-app.include_router(firms.router)
-app.include_router(people.router)
-app.include_router(reports.router)
-app.include_router(knowledge.router)
-app.include_router(insights.router)
+app.include_router(firms_router)
+app.include_router(people_router)
+app.include_router(insights_router)
+app.include_router(knowledge_router)
+app.include_router(agent_router)
 
-# http://127.0.0.1:8000
 @app.get("/health")
 def health():
-    return {"status": "OK"}
+    return {"status":"ok"}

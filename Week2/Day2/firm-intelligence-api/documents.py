@@ -6,7 +6,7 @@ unstructured text a client would actually have sitting in SharePoint.
 
 from typing import Any
 
-DOCUMENTS: list[dict[str, Any]] = [
+DOCUMENTS: list[dict[str, Any]] = [ 
     {
         "id": "doc-001",
         "title": "Harding & Voss — Market Position Note",

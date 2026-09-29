@@ -1,115 +1,119 @@
+import os
+import requests
 import streamlit as st
 
-ask_page = st.Page("ask.py", title="Ask", icon=":material/question_mark:")
-search_page = st.Page("search.py", title="Search", icon=":material/search:")
-summary_page = st.Page("summary.py", title="Summary", icon=":material/description:")
-
-pg = st.navigation([ask_page, search_page, summary_page])
-st.set_page_config(page_title="Firm Intelligence", page_icon=":material/business_chip:")
-pg.run()
+API_BASE = os.environ.get("API_BASE", "http://127.0.0.1:8000")
 
 
-# # ---------------------------------------------------------------------------
-# # Feature 1: Ask (agent, tool-use loop)
-# # ---------------------------------------------------------------------------
-# st.header("Ask")
+def _safe_detail(resp):
+    try:
+        j = resp.json()
+        return j.get("detail", str(j)) if isinstance(j, dict) else str(j)
+    except ValueError:
+        return resp.text[:300]
 
-# question = st.text_input("Ask a question about the firms", key="ask_question")
+st.set_page_config(page_title="Firm Intelligence", layout="wide")
+st.title("Firm Intelligence")
+st.caption(f"API: {API_BASE}")
 
-# if st.button("Ask", key="ask_button"):
-#     if not question.strip():
-#         st.warning("Type a question first.")
-#     else:
-#         try:
-#             response = httpx.post(
-#                 f"{API_BASE_URL}/knowledge/ask_with_tools",
-#                 json={"question": question},
-#                 timeout=60,
-#             )
-#             response.raise_for_status()
-#             result = response.json()
+tab_ask, tab_search, tab_stream = st.tabs(["Ask", "Search", "Firm summary (stream)"])
 
-#             if result.get("completed"):
-#                 st.write(result.get("answer", ""))
-#             else:
-#                 st.warning(
-#                     "The agent did not finish in time (hit its iteration limit) "
-#                     "before an answer could be produced."
-#                 )
 
-#             st.caption(
-#                 f"Tool calls made: {result.get('tool_calls_made', 'n/a')} | "
-#                 f"Input tokens: {result.get('input_tokens', 'n/a')} | "
-#                 f"Output tokens: {result.get('output_tokens', 'n/a')}"
-#             )
-#         except httpx.HTTPStatusError as e:
-#             st.error(f"Request failed ({e.response.status_code}): {e.response.text}")
-#         except httpx.RequestError as e:
-#             st.error(f"Could not reach the API: {e}")
+# --- Feature 1: Ask ---------------------------------------------------------
+with tab_ask:
+    st.subheader("Ask the agent")
+    question = st.text_area("Question", key="ask_q", placeholder="Ask anything about firms, people, or the knowledge base.")
+    if st.button("Ask", key="ask_btn"):
+        if not question.strip():
+            st.warning("Type a question first.")
+        else:
+            try:
+                r = requests.post(
+                    f"{API_BASE}/agent/ask",
+                    json={"question": question},
+                    timeout=120,
+                )
+            except requests.RequestException as e:
+                st.error(f"Request failed: {e}")
+            else:
+                if r.status_code == 200:
+                    data = r.json()
+                    if data.get("complete"):
+                        st.success("Answer")
+                    else:
+                        st.warning(
+                            f"Agent did not complete (stop_reason={data.get('stop_reason')}). "
+                            "Partial answer below."
+                        )
+                    st.write(data.get("answer") or "_(no answer text)_")
+                    c1, c2, c3 = st.columns(3)
+                    c1.metric("Tool calls", data.get("tool_calls_made", 0))
+                    c2.metric("Input tokens", data.get("input_tokens", 0))
+                    c3.metric("Output tokens", data.get("output_tokens", 0))
+                else:
+                    detail = _safe_detail(r)
+                    st.error(f"API error {r.status_code}: {detail}")
 
-# st.divider()
 
-# # ---------------------------------------------------------------------------
-# # Feature 2: Search only (retrieval, no generation)
-# # ---------------------------------------------------------------------------
-# st.header("Search only")
+# --- Feature 2: Search only -------------------------------------------------
+with tab_search:
+    st.subheader("Knowledge search")
+    q = st.text_input("Query", key="search_q")
+    top_k = st.slider("top_k", 1, 7, 3, key="search_k")
+    if st.button("Search", key="search_btn"):
+        if not q.strip():
+            st.warning("Type a query first.")
+        else:
+            try:
+                r = requests.post(
+                    f"{API_BASE}/knowledge/search",
+                    json={"question": q, "top_k": top_k},
+                    timeout=60,
+                )
+            except requests.RequestException as e:
+                st.error(f"Request failed: {e}")
+            else:
+                if r.status_code == 200:
+                    hits = r.json()
+                    if not hits:
+                        st.info("No results.")
+                    else:
+                        for h in hits:
+                            st.markdown(
+                                f"**{h.get('title', h.get('id', '?'))}** — score `{h.get('score'):.3f}`"
+                            )
+                elif r.status_code == 409:
+                    st.warning(
+                        "Index has not been built yet. "
+                        f"POST {API_BASE}/knowledge/index to build it. "
+                        f"(server said: {_safe_detail(r)})"
+                    )
+                else:
+                    st.error(f"Search failed ({r.status_code}): {_safe_detail(r)}")
 
-# search_query = st.text_input("Search the knowledge base", key="search_query")
 
-# if st.button("Search", key="search_button"):
-#     if not search_query.strip():
-#         st.warning("Type a search query first.")
-#     else:
-#         try:
-#             response = httpx.post(
-#                 f"{API_BASE_URL}/knowledge/search",
-#                 json={"question": search_query},
-#                 timeout=30,
-#             )
-#             response.raise_for_status()
-#             result = response.json()
-#             results = result.get("results", [])
-
-#             if not results:
-#                 st.info("No results found.")
-#             else:
-#                 for hit in results:
-#                     st.write(f"**{hit.get('title')}** — score: {hit.get('score')}")
-#         except httpx.HTTPStatusError as e:
-#             if e.response.status_code == 409:
-#                 st.warning(
-#                     "The knowledge index has not been built yet. "
-#                     "Build it before searching."
-#                 )
-#             else:
-#                 st.error(f"Search failed ({e.response.status_code}): {e.response.text}")
-#         except httpx.RequestError as e:
-#             st.error(f"Could not reach the API: {e}")
-
-# st.divider()
-
-# # ---------------------------------------------------------------------------
-# # Feature 3: Streaming summary
-# # ---------------------------------------------------------------------------
-# st.header("Streaming summary")
-
-# firm_id = st.number_input("Firm id", min_value=1, step=1, key="firm_id")
-
-# if st.button("Get summary", key="summary_button"):
-#     placeholder = st.empty()
-#     try:
-#         text = ""
-#         with httpx.stream(
-#             "GET",
-#             f"{API_BASE_URL}/firms/{int(firm_id)}/stream",
-#             timeout=60,
-#         ) as response:
-#             if response.status_code != 200:
-#                 response.read()
-#                 st.error(f"Request failed ({response.status_code}): {response.text}")
-#             else:
-#                 for chunk in response.iter_text():
-#                     text += chunk
-#                     placeholder.write(text)
-#     except httpx.RequestError as e:
-#         st.error(f"Could not reach the API: {e}")
+# --- Feature 3: Streaming firm summary --------------------------------------
+with tab_stream:
+    st.subheader("Firm summary (streamed)")
+    firm_id = st.number_input("Firm id", min_value=1, step=1, value=1, key="firm_id")
+    if st.button("Summarise", key="stream_btn"):
+        placeholder = st.empty()
+        buf = []
+        try:
+            with requests.get(
+                f"{API_BASE}/firms/{int(firm_id)}/summary/stream",
+                stream=True,
+                timeout=(10, 300),
+            ) as r:
+                if r.status_code != 200:
+                    st.error(f"API error {r.status_code}: {_safe_detail(r)}")
+                else:
+                    for chunk in r.iter_content(chunk_size=None, decode_unicode=True):
+                        if not chunk:
+                            continue
+                        buf.append(chunk if isinstance(chunk, str) else chunk.decode("utf-8", "replace"))
+                        placeholder.markdown("".join(buf))
+                    if not buf:
+                        st.info("Stream ended with no content.")
+        except requests.RequestException as e:
+            st.error(f"Request failed: {e}")

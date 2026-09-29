@@ -1,0 +1,52 @@
+W2 - 21.09.2026
+- Embedding , voyageai first time use
+- Enforcing llm to return structured data and validate it (using client.messages.parse output_format)
+
+main takeaway: How to implement cosine similarity 
+
+----------------
+W2 - 22-09-2026
+- Seeing in action how some embedding models struggle with consuming 
+a text and relizing the relations in tricky texts such as negations.
+
+- Gaurding against the low similarity scores (where the embedding model 
+cannot give a reliable answer) using a relevance_floor variable therefore 
+preventing the LLM to generate based on wrong unrelated context
+
+- How to enforcing the LLM to provide grounded response by injecting the 
+context into the user's content messages when creating the message 
+for the model (context going into user's message not the system)
+
+
+main takeaway: Starting to build simple and add complex logic and features gradually
+
+--------------
+W2 - 23-09-2026:
+- Integrating vector db into our application , using upsert instead of add and using collection.count to check if the data exists
+- authorization check at document level by adding metadata to stored chunks
+- validation models using gold dataset and different metrics and emphesising
+ that there is no gaurantee when the model performs well on the gold dataset
+ - gaurdrailing the retrival step using a treshold for similarity score
+
+main takeaway: cost control in embedding using batch APIs 
+
+--------------
+W2 - 24-09-2026:
+- Never let the agent decide to terminate the loop, always have a restriction
+ limit and a check to have a difinite number of loops for tool use
+- Inside the tool calling loop if a runtime error happned we return the error instead of raise in order to continue with the loop
+- We pass the tools to the 
+
+-----
+w2 25-09-2026
+AI fundamentals
+prompt engineering: persona role based prompts
+4D Framework
+-----
+W3 28-09-2026
+- 
+
+
+
+
+
