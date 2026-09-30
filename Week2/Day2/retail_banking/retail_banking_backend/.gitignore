@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+build/
+dist/
+
+# Virtual environment
+.venv/
+venv/
+env/
+
+# Secrets & environment
+.env
+.env.*
+!.env.example
+
+# Chroma persistent store
+chroma_store/
+*.sqlite3
+
+# Test & coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
