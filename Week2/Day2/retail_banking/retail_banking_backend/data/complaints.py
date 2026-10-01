@@ -4,14 +4,14 @@ Each complaint belongs to exactly one customer (customer_id -> CUSTOMERS.id).
 """
 
 from typing import Any
-from retail_banking_backend.data.enums import ComplaintStatus, Severity, Channel, Product_type
+from data.enums import ComplaintStatus, Severity, Channel, ProductType
 
 # complaints (product, channel, severity, status),
 COMPLAINTS: list[dict[str, Any]] = [
     {
         "id": 1,
         "customer_id": 1,
-        "product": Product_type.credit_card,
+        "product": ProductType.credit_card,
         "channel": Channel.app,
         "severity": Severity.medium,
         "status": ComplaintStatus.resolved,
@@ -25,7 +25,7 @@ COMPLAINTS: list[dict[str, Any]] = [
     {
         "id": 2,
         "customer_id": 2,
-        "product": Product_type.mortgage,
+        "product": ProductType.mortgage,
         "channel": Channel.phone,
         "severity": Severity.high,
         "status": ComplaintStatus.resolved,
@@ -39,7 +39,7 @@ COMPLAINTS: list[dict[str, Any]] = [
     {
         "id": 3,
         "customer_id": 3,
-        "product": Product_type.current_account,
+        "product": ProductType.current_account,
         "channel": Channel.branch,
         "severity": Severity.high,
         "status": ComplaintStatus.in_review,
@@ -53,7 +53,7 @@ COMPLAINTS: list[dict[str, Any]] = [
     {
         "id": 4,
         "customer_id": 4,
-        "product": Product_type.personal_loan,
+        "product": ProductType.personal_loan,
         "channel": Channel.email,
         "severity": Severity.medium,
         "status": ComplaintStatus.resolved,
@@ -67,7 +67,7 @@ COMPLAINTS: list[dict[str, Any]] = [
     {
         "id": 5,
         "customer_id": 5,
-        "product": Product_type.credit_card,
+        "product": ProductType.credit_card,
         "channel": Channel.webform,
         "severity": Severity.high,
         "status": ComplaintStatus.open,
@@ -81,7 +81,7 @@ COMPLAINTS: list[dict[str, Any]] = [
     {
         "id": 6,
         "customer_id": 1,
-        "product": Product_type.savings,
+        "product": ProductType.savings,
         "channel": Channel.app,
         "severity": Severity.low,
         "status": ComplaintStatus.resolved,
@@ -95,7 +95,7 @@ COMPLAINTS: list[dict[str, Any]] = [
     {
         "id": 7,
         "customer_id": 3,
-        "product": Product_type.mortgage,
+        "product": ProductType.mortgage,
         "channel": Channel.phone,
         "severity": Severity.high,
         "status": ComplaintStatus.escalated,
@@ -109,7 +109,7 @@ COMPLAINTS: list[dict[str, Any]] = [
     {
         "id": 8,
         "customer_id": 6,
-        "product": Product_type.current_account,
+        "product": ProductType.current_account,
         "channel": Channel.app,
         "severity": Severity.medium,
         "status": ComplaintStatus.open,
