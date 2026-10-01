@@ -62,7 +62,7 @@ def add_complaint(new_complaint:NewComplaint):
     COMPLAINTS.append(complaint)
     return complaint
 
-@router.put("/{complaint_id}", status_code=200)
+@router.put("/{complaint_id}")
 def update_complaint(
     updated:ComplaintUpdate, 
     complaint:Complaint=Depends(get_complaint_or_404)
