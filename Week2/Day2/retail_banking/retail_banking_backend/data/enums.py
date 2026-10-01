@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class Product_type(str, Enum):
+class ProductType(str, Enum):
     mortgage = "mortgage"
     credit_card = "credit_card"
     current_account = "current_account"

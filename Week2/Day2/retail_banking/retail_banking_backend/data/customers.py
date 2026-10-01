@@ -6,7 +6,7 @@ expected to spot vulnerability signals in the complaint text itself.
 """
 
 from typing import Any
-from retail_banking_backend.data.enums import CustomerSegment
+from data.enums import CustomerSegment
 
 # ustomers (segment, vulnerability-flag),
 CUSTOMERS: list[dict[str, Any]] = [
