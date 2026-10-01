@@ -2,13 +2,7 @@ from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel, Field
 from data.enums import CustomerSegment
 from data.customers import CUSTOMERS
-
-# implemented:
-# list all customers filter by segment & vulnerability_flag 
-# get customer by id
-# add new customer
-# update a customer
-# remove a customer
+from data.complaints import COMPLAINTS
 
 router = APIRouter(prefix="/customers", tags=["customers"])
 
@@ -21,9 +15,9 @@ class Customer(NewCustomer):
     id:int
 
 class CustomerUpdate(BaseModel):
-    name: str | None = Field(min_length=3)
-    segement : CustomerSegment | None
-    vulnerability_flag: bool | None
+    name: str | None = Field(default=None, min_length=3)
+    segement : CustomerSegment | None = None
+    vulnerability_flag: bool | None = None
 
 def get_customer_or_404(customer_id:int) -> dict:
     for customer in CUSTOMERS:
@@ -44,6 +38,13 @@ def list_customers(segment:CustomerSegment | None = None, vulnerability_flag: bo
 def get_customer(customer:dict = Depends(get_customer_or_404)):
     return customer
 
+# All complaints for one specific customer
+@router.get("/{customer_id}/complaints")
+def list_customer_complaints(
+    customer: dict = Depends(get_customer_or_404),
+  ) -> list[dict]:
+    return [c for c in COMPLAINTS if c["customer_id"] == customer["id"]]
+
 @router.post("", status_code=201)
 def add_customer(new_customer:NewCustomer) -> dict:
     new_id = max(customer["id"] for customer in CUSTOMERS) + 1
@@ -54,9 +55,8 @@ def add_customer(new_customer:NewCustomer) -> dict:
 @router.delete("/{customer_id}", status_code=204)
 def remove_customer(customer:Customer= Depends(get_customer_or_404)): 
     CUSTOMERS.remove(customer)
-    return
 
-@router.put("/{customer_id}", status_code=200)
+@router.put("/{customer_id}")
 def update_customer(
     updated: CustomerUpdate, customer: Customer=Depends(get_customer_or_404)
     ) -> Customer:
