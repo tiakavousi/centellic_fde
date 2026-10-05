@@ -1,6 +1,7 @@
 import os
 import anthropic
 from pydantic import BaseModel, Field
+import grounding
 
 MODEL = "claude-haiku-4-5-20251001"
 
@@ -113,15 +114,12 @@ def analyse_frim(firm) -> dict:
 
 # Adding the generation step
 # Retrieval finds documents ... RAG third letter is generate _ turn the context into an answer
-
 GROUNDED_SYSTEM_PROMPT = (
-    "You are a legal market analyst. Answer using only the context provided to you"
-    "Cite the documnet id in square brackets after each claim, like [doc_001]."
-    "IFthe context does not contain the answer, say exactly:"
-    "'The provided ocumnets do not answer the question.'"
+    "You are a legal market analyst. Answer using ONLY the context provided. "
+    "Cite the document id in square brackets after each claim, like [doc-001]. "
+    f"If the context does not contain the answer, say exactly: '{grounding.REFUSAL_SENTENCE}' "
     "Never use knowledge from outside the context. Use British English. No em dash characters."
 )
-
 
 # notice where the context goes
 # rules in system
