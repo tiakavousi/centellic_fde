@@ -15,13 +15,40 @@ SYSTEM_PROMPT = (
     "Standard: escalate rather than resolve, and never advise ending collections or recovery activity without specialist review."
 )
 
-def build_complaint_summary_user_prompt(complaint:dict[str,Any]) :
-    return(
-        f"Summarise this complaint in two short paragraphs\n\n"
-        f"customer channel = {complaint['channel']}\n"
-        f"complaint severity = {complaint['severity']}\n"
-        f"complaint status = {complaint['status']}\n"
-        f"complaint summary = {complaint['summary']}\n"
-        f"complaint related to product = {complaint['product']}\n"
-        f"complaint opened date = {complaint['opened_date']}\n"
+def build_complaint_summary_user_prompt(complaint: dict[str, Any]) -> str:
+    return (
+        "Summarise this complaint in two short paragraphs.\n\n"
+        f"Complaint channel: {complaint['channel']}\n"
+        f"Intake severity: {complaint['severity']}\n"
+        f"Status: {complaint['status']}\n"
+        f"Product: {complaint['product']}\n"
+        f"Opened: {complaint['opened_date']}\n"
+        f"Description: {complaint['summary']}\n"
+    )
+
+
+def build_complaint_analysis_user_prompt(
+    complaint: dict[str, Any],
+    customer: dict[str, Any],
+) -> str:
+    return (
+        "Classify this complaint and return every field of the ComplaintAnalysis "
+        "schema.\n\n"
+        "Guidance:\n"
+        "- List redress categories ordered by importance, dominant harm first."
+        " Use 'caveats' for ambiguity, not for secondary remedies.\n"
+        "- If the complaint status is already 'resolved' or 'escalated', frame "
+        "the recommended next step as a post-resolution review action.\n\n"
+        "Complaint\n"
+        f"- ID: {complaint['id']}\n"
+        f"- Product: {complaint['product']}\n"
+        f"- Channel: {complaint['channel']}\n"
+        f"- Intake severity: {complaint['severity']}\n"
+        f"- Status: {complaint['status']}\n"
+        f"- Opened: {complaint['opened_date']}\n"
+        f"- Description: {complaint['summary']}\n\n"
+        "Customer\n"
+        f"- ID: {customer['id']}\n"
+        f"- Segment: {customer['segment']}\n"
+        f"- Vulnerability flag (stored): {customer['vulnerability_flag']}\n"
     )
