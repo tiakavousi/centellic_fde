@@ -1,7 +1,7 @@
-import config  # noqa: F401 — loads .env.local
 import os
-import voyageai
 
+import config  # noqa: F401 — loads .env.local
+import voyageai
 
 VOYAGEAI_API_KEY = os.environ["VOYAGEAI_API_KEY"]
 VOYAGE_MODEL = os.environ["VOYAGE_MODEL"]

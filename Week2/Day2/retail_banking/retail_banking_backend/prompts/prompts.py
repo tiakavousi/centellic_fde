@@ -1,5 +1,14 @@
 from typing import Any
 
+# TODO:
+# Add to prompts/prompts.py:
+# - GROUNDED_SYSTEM_PROMPT — your SYSTEM_PROMPT plus two sentences: 
+# "Use only the sources below. Cite source IDs in square brackets, e.g. [doc-003]. 
+# If the sources do not answer the question, say so."
+# - build_grounded_user_prompt(question, hits) — 
+# formats as Question:\n...\n\nSources\n---\n[doc-003] Title\nbody\n\n[doc-005] Title\nbody\n---.
+
+
 SYSTEM_PROMPT = (
     "You are a complaints and conduct analyst at a UK retail bank, writing for "
     "complaint handlers and the conduct-risk team. "

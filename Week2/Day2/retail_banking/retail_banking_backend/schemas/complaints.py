@@ -5,7 +5,9 @@ Stored-record enums live in data/enums.py.
 """
 
 from enum import Enum
+
 from pydantic import BaseModel, Field
+
 from data.enums import Severity
 
 

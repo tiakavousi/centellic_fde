@@ -3,8 +3,8 @@ The document corpus. SYNTHETIC PLACEHOLDER CONTENT ONLY.
 """
 
 from typing import Any
-from data.enums import DocumentType
 
+from data.enums import DocumentType
 
 DOCUMENTS: list[dict[str, Any]] = [
     {

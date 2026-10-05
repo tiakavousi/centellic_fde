@@ -3,7 +3,6 @@
 
 from typing import Any
 
-
 PRODUCTS: list[dict[str, Any]] = [
     {
         "id": 1,

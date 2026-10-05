@@ -1,14 +1,19 @@
 from typing import Any
+
+import llm
 from fastapi import APIRouter, Depends
 from fastapi.responses import StreamingResponse
-from routers.complaints import get_complaint_or_404
 from llm import generate, stream
-from prompts.prompts import build_complaint_summary_user_prompt, SYSTEM_PROMPT, build_complaint_analysis_user_prompt
-import llm
-from schemas.complaints import ComplaintAnalysis, ComplaintAnalyzeResponse
+from prompts.prompts import (
+    SYSTEM_PROMPT,
+    build_complaint_analysis_user_prompt,
+    build_complaint_summary_user_prompt,
+)
+from routers.complaints import get_complaint_or_404
 from routers.customers import get_customer_or_404
+from schemas.complaints import ComplaintAnalysis, ComplaintAnalyzeResponse
 
-router = APIRouter(prefix="/llm", tags=["llm", "complaints"])
+router = APIRouter(prefix="/insights", tags=["llm", "complaints"])
 
 @router.post("/complaints/{complaint_id}/summary")
 def generate_complaint_summary(complaint= Depends(get_complaint_or_404)) -> dict[str, Any]:

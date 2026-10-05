@@ -1,6 +1,7 @@
-import config
 import os
+
 import chromadb
+import config
 from data.documents import DOCUMENTS
 from knowledge import embed_text
 

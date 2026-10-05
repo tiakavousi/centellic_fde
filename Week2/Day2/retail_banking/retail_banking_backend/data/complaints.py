@@ -4,7 +4,8 @@ Each complaint belongs to exactly one customer (customer_id -> CUSTOMERS.id).
 """
 
 from typing import Any
-from data.enums import ComplaintStatus, Severity, Channel, ProductType
+
+from data.enums import Channel, ComplaintStatus, ProductType, Severity
 
 # complaints (product, channel, severity, status),
 COMPLAINTS: list[dict[str, Any]] = [

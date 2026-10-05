@@ -1,8 +1,8 @@
-from fastapi import APIRouter, HTTPException, Depends
-from pydantic import BaseModel, Field
-from data.enums import CustomerSegment
-from data.customers import CUSTOMERS
 from data.complaints import COMPLAINTS
+from data.customers import CUSTOMERS
+from data.enums import CustomerSegment
+from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel, Field
 
 router = APIRouter(prefix="/customers", tags=["customers"])
 
