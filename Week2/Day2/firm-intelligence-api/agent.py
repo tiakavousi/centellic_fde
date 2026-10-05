@@ -51,6 +51,7 @@ def ask_with_tools(question: str) -> dict:
             messages=messages,
             tools=[SEARCH_TOOL],
         )
+        last_stop_reason = response.stop_reason
         total_input_tokens += response.usage.input_tokens
         total_output_tokens += response.usage.output_tokens
 
@@ -65,7 +66,7 @@ def ask_with_tools(question: str) -> dict:
                 "tool_calls_made": tool_calls_made,
                 "input_tokens": total_input_tokens,
                 "output_tokens": total_output_tokens,
-                "stop_reason": response.stop_reason,
+                "stop_reason": response.stop_reason
             }
         # response  content  - when added a message with role assistant,
         # content is a list of blocks, each block has a type and text
@@ -83,10 +84,17 @@ def ask_with_tools(question: str) -> dict:
                 "tool_use_id": tool_block.id,
                 "content": result_text,
                 "is_error": is_error,
-
             })
 
         messages.append({ "role": "user", "content": tool_results })
+    return {
+          "answer": "Could not reach a final answer within the iteration limit.",
+          "complete": False,
+          "tool_calls_made": tool_calls_made,
+          "input_tokens": total_input_tokens,
+          "output_tokens": total_output_tokens,
+          "stop_reason": last_stop_reason,
+      }
 
 
 def _execute_tool(name: str, tool_input: dict) -> tuple[str, bool]:
