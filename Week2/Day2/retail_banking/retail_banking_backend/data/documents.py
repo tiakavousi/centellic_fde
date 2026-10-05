@@ -3,14 +3,14 @@ The document corpus. SYNTHETIC PLACEHOLDER CONTENT ONLY.
 """
 
 from typing import Any
-from retail_banking_backend.data.enums import DocumentType
+from data.enums import DocumentType
 
 
 DOCUMENTS: list[dict[str, Any]] = [
     {
         "id": "doc-001",
         "title": "Complaint Handling Policy — Timeliness and Escalation",
-        "complaint_id": None, # for the porpuse of having uniform shape in all docs
+        "complaint_id": None, # for the purpose of having uniform shape in all docs
         "type": DocumentType.policy,
         "body": (
             "All complaints must be acknowledged within three business days of "
@@ -271,6 +271,48 @@ DOCUMENTS: list[dict[str, Any]] = [
             "a systemic finding. No individual redress payment was made "
             "beyond the fee refunds; the process defect was treated as the "
             "material remediation."
+        ),
+    },
+    {
+        "id": "doc-016",
+        "title": "Authorised Push Payment Fraud — Reimbursement Procedure",
+        "complaint_id": None,
+        "type": DocumentType.policy,
+        "body": (
+            "Where a customer reports that they have been deceived into "
+            "authorising a payment to a third party, the case must be "
+            "assessed against the Contingent Reimbursement Model (CRM) code. "
+            "The default position is that the customer is reimbursed in full "
+            "unless the bank can evidence that one or more exceptions apply: "
+            "the customer ignored a specific and effective warning, acted "
+            "with gross negligence, or failed to take reasonable steps to "
+            "verify the payee. Vulnerability at the time of the payment "
+            "removes the gross negligence exception. A reimbursement decision "
+            "must be issued within fifteen business days of the claim being "
+            "raised; where more time is needed, the customer must be informed "
+            "in writing and the reason recorded. Declines must be reviewed by "
+            "a second handler before communication to the customer."
+        ),
+    },
+    {
+        "id": "doc-017",
+        "title": "FOS Decision Note — APP Fraud Reimbursement Declined by Bank",
+        "complaint_id": 8,
+        "type": DocumentType.ombudsman,
+        "body": (
+            "The customer was contacted by a party claiming to be from the "
+            "bank's fraud team and authorised a payment on that basis. The "
+            "bank declined the reimbursement claim on the ground that the "
+            "customer had been given generic warnings about impersonation "
+            "scams within the mobile application. The Ombudsman found that "
+            "the warnings relied on were not specific and effective in the "
+            "circumstances of this payment, and that the exception under the "
+            "CRM code did not apply. The complaint was upheld. The bank was "
+            "directed to reimburse the disputed amount in full, pay interest "
+            "at eight per cent simple from the date of the payment and pay "
+            "two hundred pounds for distress and inconvenience. The decision "
+            "noted that the second-handler review required before decline had "
+            "not been evidenced in the bank's file."
         ),
     },
 ]

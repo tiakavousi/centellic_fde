@@ -6,7 +6,7 @@ from collections.abc import Iterator
 from pydantic import BaseModel, ValidationError
 from fastapi import HTTPException
 
-MODEL = os.environ["ANTHROPIC_MODEL_NAME"]
+MODEL = os.environ["ANTHROPIC_MODEL"]
 ANTHROPIC_API_KEY = os.environ["ANTHROPIC_API_KEY"]
 MAX_TOKENS = int(os.environ["MAX_TOKENS"])
 MAX_RETRIES = int(os.environ["MAX_RETRIES"])
