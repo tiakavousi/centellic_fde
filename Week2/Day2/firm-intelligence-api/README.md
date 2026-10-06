@@ -71,3 +71,8 @@ Interactive docs: <http://localhost:8000/docs>
 - **Index lifecycle**: `/knowledge/search` requires the index to exist. Call `POST /knowledge/index` once after startup, or restart the server after changing `documents.py`.
 - **Data is in-memory**: firms, people, and the vector index all reset on restart.
 - **Model versions** are pinned in `llm.py` (`MODEL`) and `knowledge.py` (`EMBED_MODEL`).
+
+
+## Sample questions the system can be asked: 
+- "Which firm has the strongest disputes position, and how does that compare with current UK lateral hiring trends?"
+- "Identify firms with international ambitions, then explain whether the corpus contains evidence that those strategies are succeeding."
