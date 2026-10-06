@@ -125,14 +125,14 @@ GROUNDED_SYSTEM_PROMPT = (
 # rules in system
 # data in user
 
-def answer_from_context(question:str, context:str) -> dict :
+def answer_from_context(question:str, context:str, system = GROUNDED_SYSTEM_PROMPT) -> dict :
     """
     Answer restrictly from the provided context.
     """
     response = client.messages.create(
         model= MODEL,
         max_tokens=500,
-        system = GROUNDED_SYSTEM_PROMPT,
+        system = system,
         messages=[{
             "role": "user",
             "content": f"Context: \n\n{context}\n\nQuestion: {question}",
