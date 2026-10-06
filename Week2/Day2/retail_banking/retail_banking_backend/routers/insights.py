@@ -13,9 +13,9 @@ from routers.complaints import get_complaint_or_404
 from routers.customers import get_customer_or_404
 from schemas.complaints import ComplaintAnalysis, ComplaintAnalyzeResponse
 
-router = APIRouter(prefix="/insights", tags=["llm", "complaints"])
+router = APIRouter(prefix="/complaints", tags=["insights"])
 
-@router.post("/complaints/{complaint_id}/summary")
+@router.post("/{complaint_id}/summary")
 def generate_complaint_summary(complaint= Depends(get_complaint_or_404)) -> dict[str, Any]:
     complaint_summary = generate(SYSTEM_PROMPT, build_complaint_summary_user_prompt(complaint))
     return {
@@ -26,12 +26,12 @@ def generate_complaint_summary(complaint= Depends(get_complaint_or_404)) -> dict
         **complaint_summary
     }
 
-@router.get("/complaints/{complaint_id}/summary/stream")
+@router.get("/{complaint_id}/summary/stream")
 def generate_complaint_summary_stream(complaint= Depends(get_complaint_or_404)) -> StreamingResponse:
     chunks = stream(SYSTEM_PROMPT,build_complaint_summary_user_prompt(complaint))
     return StreamingResponse(chunks,media_type="text/plain")
 
-@router.post("/complaints/{complaint_id}/analyse")
+@router.post("/{complaint_id}/analyse")
 def analyse_complaint(complaint= Depends(get_complaint_or_404)) -> ComplaintAnalyzeResponse:
     customer = get_customer_or_404(complaint["customer_id"])
     structured_result =  llm.generate_structured(
@@ -48,7 +48,7 @@ def analyse_complaint(complaint= Depends(get_complaint_or_404)) -> ComplaintAnal
         "stop_reason": structured_result["stop_reason"]
     } 
 
-@router.get("/complaints/{complaint_id}/summary/estimate")
+@router.get("/{complaint_id}/summary/estimate")
 def estimate(complaint= Depends(get_complaint_or_404)):
     tokens = llm.estimate_input_tokens(SYSTEM_PROMPT, build_complaint_summary_user_prompt(complaint))
     return{

@@ -16,7 +16,7 @@ class Customer(NewCustomer):
 
 class CustomerUpdate(BaseModel):
     name: str | None = Field(default=None, min_length=3)
-    segement : CustomerSegment | None = None
+    segment : CustomerSegment | None = None
     vulnerability_flag: bool | None = None
 
 def get_customer_or_404(customer_id:int) -> dict:
