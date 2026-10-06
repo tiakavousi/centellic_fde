@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 import knowledge_store as knowledge
 from anthropic import APIStatusError,APITimeoutError,RateLimitError
+import grounding
 import llm
 
 
@@ -89,12 +90,12 @@ def ask(q:Question):
         )
 
     return {
-            "question": q.question,
-            "answer": result["answer"],
-            "refused": False,
-            "sources": [{"id":hit["id"], "title":hit["title"], "score":hit["score"]} for hit in usable],
-            "input_tokens": result["input_tokens"],
-            "output_tokens": result["output_tokens"],
-            "stop_reason": result["stop_reason"]
-
+        "question": q.question,
+        "answer": result["answer"],
+        "refused": False,
+        "sources": [{"id":hit["id"], "title":hit["title"], "score":hit["score"]} for hit in usable],
+        "input_tokens": result["input_tokens"],
+        "output_tokens": result["output_tokens"],
+        "stop_reason": result["stop_reason"],
+        "grounding": grounding.check_citations(result["answer"], [h["id"] for h in usable])
     }
