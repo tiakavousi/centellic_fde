@@ -14,11 +14,7 @@ from prompts.prompts import build_grounded_user_prompt, GROUNDED_SYSTEM_PROMPT
 TOP_K = int(os.environ["TOP_K"])
 RELEVANCE_FLOOR = float(os.environ["RELEVANCE_FLOOR"])
 
-router = APIRouter(prefix="/knowledge", tags=["knwoledge"])
-
-class Question(BaseModel):
-    query: str = Field(min_length=3)
-    top_k:int = Field(default=TOP_K)
+router = APIRouter(prefix="/knowledge", tags=["knowledge"])
 
 @router.post("/index")
 def generate_indexes():
@@ -29,16 +25,16 @@ def generate_indexes():
     }
 
 @router.get("/search")
-def search_quary(question: Question):
+def search_quary(query: str, top_k: int = TOP_K):
     try:
-        return {"hits": search(question.query, question.top_k), "top_k": question.top_k}
+        return {"hits": search(query, top_k), "top_k": top_k}
     except RuntimeError as e:
         raise HTTPException(status_code=409, detail=str(e))
 
 @router.post("/ask")
-def ask_question(question: Question):
+def ask_question(query: str, top_k: int = TOP_K):
     try:
-        hits = search(question.query, question.top_k)
+        hits = search(query, top_k)
     except RuntimeError as e:
         raise HTTPException(status_code=409, detail=str(e))
     
@@ -46,18 +42,18 @@ def ask_question(question: Question):
 
     if not usable:
         return {
-            "question": question,
+            "question": query,
             "answer": None,
             "refused": True,
             "reason": "No document in the corpus is relevant to the question",
             "sources": []
         }
     
-    user_prompt = build_grounded_user_prompt(question.query, usable)
+    user_prompt = build_grounded_user_prompt(query, usable)
     result = llm.generate(GROUNDED_SYSTEM_PROMPT, user_prompt)
 
     return {
-        "question": question.query,
+        "question": query,
         "answer": result["text"],
         "refused": False,
         "sources": [{"id": h["id"], "title": h["title"], "score": h["score"]} for h in usable],
