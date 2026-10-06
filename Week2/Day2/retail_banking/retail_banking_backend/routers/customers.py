@@ -1,8 +1,8 @@
-from fastapi import APIRouter, HTTPException, Depends
-from pydantic import BaseModel, Field
-from data.enums import CustomerSegment
-from data.customers import CUSTOMERS
 from data.complaints import COMPLAINTS
+from data.customers import CUSTOMERS
+from data.enums import CustomerSegment
+from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel, Field
 
 router = APIRouter(prefix="/customers", tags=["customers"])
 
@@ -16,7 +16,7 @@ class Customer(NewCustomer):
 
 class CustomerUpdate(BaseModel):
     name: str | None = Field(default=None, min_length=3)
-    segement : CustomerSegment | None = None
+    segment : CustomerSegment | None = None
     vulnerability_flag: bool | None = None
 
 def get_customer_or_404(customer_id:int) -> dict:

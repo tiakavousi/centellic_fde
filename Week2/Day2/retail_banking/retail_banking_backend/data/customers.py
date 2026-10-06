@@ -6,6 +6,7 @@ expected to spot vulnerability signals in the complaint text itself.
 """
 
 from typing import Any
+
 from data.enums import CustomerSegment
 
 # ustomers (segment, vulnerability-flag),

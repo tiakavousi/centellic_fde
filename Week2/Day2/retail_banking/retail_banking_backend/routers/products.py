@@ -1,7 +1,7 @@
-from fastapi import APIRouter,HTTPException,Depends
-from data.products import PRODUCTS
-from pydantic import BaseModel
 from data.enums import ProductType
+from data.products import PRODUCTS
+from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel
 
 router = APIRouter(prefix="/products", tags = ["products"])
 

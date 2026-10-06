@@ -1,9 +1,10 @@
-from fastapi import APIRouter, Depends, HTTPException
-from data.complaints import COMPLAINTS
-from pydantic import BaseModel
-from data.enums import ComplaintStatus, Severity, ProductType, Channel
-from routers.customers import get_customer_or_404
 from datetime import date
+
+from data.complaints import COMPLAINTS
+from data.enums import Channel, ComplaintStatus, ProductType, Severity
+from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel
+from routers.customers import get_customer_or_404
 
 router = APIRouter(prefix="/complaints", tags=["complaints"])
 

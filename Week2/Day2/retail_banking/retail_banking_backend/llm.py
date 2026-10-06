@@ -1,10 +1,12 @@
 import os
-import anthropic
+from collections.abc import Iterator
 from functools import lru_cache
 from typing import Any
-from collections.abc import Iterator
-from pydantic import BaseModel, ValidationError
+
+import anthropic
+import config  # noqa: F401 — loads .env.local
 from fastapi import HTTPException
+from pydantic import BaseModel, ValidationError
 
 MODEL = os.environ["ANTHROPIC_MODEL"]
 ANTHROPIC_API_KEY = os.environ["ANTHROPIC_API_KEY"]
@@ -118,3 +120,11 @@ def handle_anthropic_error(exc: Exception) -> HTTPException:
     if isinstance(exc, anthropic.RateLimitError):
         return HTTPException(429, "Upstream Model Rate Limit Error")
     return HTTPException(502, "Upstream Model Error")
+
+def estimate_input_tokens(system: str, user: str) -> int:
+    counted = get_client().messages.count_tokens(
+        model= MODEL,
+        system=system,
+        messages=[{'role': 'user', 'content':user}]
+    )
+    return counted.input_tokens

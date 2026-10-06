@@ -1,5 +1,21 @@
 from typing import Any
 
+REFUSAL_SENTENCE = "The provided documents do not answer that question."
+
+GROUNDED_SYSTEM_PROMPT = (
+    "You are a complaints and conduct analyst at a UK retail bank. "
+    "Answer using ONLY the sources provided below. "
+    "Cite the document id in square brackets after each claim, like [doc-003]. "
+    f"If the sources do not contain the answer, say exactly: '{REFUSAL_SENTENCE}' "
+    "Never use knowledge from outside the sources. "
+    "Never state a specific redress amount; identify the redress category only "
+    "and defer the figure to a human handler. "
+    "Never recommend closing or dismissing a complaint autonomously. "
+    "Where the customer is flagged as vulnerable, apply the Vulnerable Customers "
+    "Standard: escalate rather than resolve. "
+    "Use British English and formal, neutral language. No em dash characters."
+)
+
 SYSTEM_PROMPT = (
     "You are a complaints and conduct analyst at a UK retail bank, writing for "
     "complaint handlers and the conduct-risk team. "
@@ -52,3 +68,7 @@ def build_complaint_analysis_user_prompt(
         f"- Segment: {customer['segment']}\n"
         f"- Vulnerability flag (stored): {customer['vulnerability_flag']}\n"
     )
+
+def build_grounded_user_prompt(question: str, hits: list[dict]) -> str:
+      sources = "\n\n".join(f"[{h['id']}] {h['title']}\n{h['body']}" for h in hits)
+      return f"Question: {question}\n\nSources\n---\n{sources}\n---"
