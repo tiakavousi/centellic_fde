@@ -1,7 +1,10 @@
 import os
 import anthropic
+from dotenv import load_dotenv
 from pydantic import BaseModel, Field
 import grounding
+
+load_dotenv()
 
 MODEL = "claude-haiku-4-5-20251001"
 
