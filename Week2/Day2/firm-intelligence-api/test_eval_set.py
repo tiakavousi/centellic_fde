@@ -5,6 +5,7 @@ from documents import DOCUMENTS
 from eval_set import EVAL_SET, answerable
 from eval_tools import contain_evidence, keywords_present, normalise
 import collections
+from grounding import REFUSAL_SENTENCE
 
 ALL_DOCS = {d['id']:d for d in DOCUMENTS + CORPUS_DOCUMENTS}
 
@@ -67,4 +68,27 @@ def test_every_evidence_span_appears_once():
 
 # test keyword matching in whole word and refusal aware
 def test_keyword_matching_in_whole_word_and_refusal_aware():
-    pass
+    cases = [
+          # whole-word match
+          ("The firm operates in the UK.", ["UK"], True),
+          # substring that is NOT a whole word — must fail
+          ("They expanded into Ukraine.", ["UK"], False),
+          # prefix wildcard
+          ("strong litigation practice", ["litig*"], True),
+          # multi-group AND — both hit
+          ("offices in Lagos and Nairobi", ["Lagos", "Nairobi"], True),
+          # multi-group AND — one missing
+          ("offices in Lagos", ["Lagos", "Nairobi"], False),
+          # alternatives within a group (OR)
+          ("based in London", ["London|UK"], True),
+          # refusal answer — must be False even if keyword appears
+          (REFUSAL_SENTENCE, ["UK"], False),
+          # None answer
+          (None, ["UK"], False),
+      ]
+    failures = []
+    for answer, keywords, expected in cases:
+        got = keywords_present(answer, keywords)
+        if got != expected:
+            failures.append((answer, keywords, expected, got))
+    assert not failures, f"keyword matching regressions: {failures}"

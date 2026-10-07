@@ -14,6 +14,7 @@ def contain_evidence(chunk_text: str, evidence: str) -> bool:
 
 # alternative_matches
 def _alternative_matches(answer: str, alternative: str) -> bool:
+    alternative = alternative.lower()
     prefix = alternative.endswith("*")
     core = re.escape(alternative.rstrip("*"))
     ending = "" if prefix else r"(?![a-z0-9])"
