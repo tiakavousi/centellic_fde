@@ -1,11 +1,16 @@
 import os
+from datetime import date
+
+import config  # noqa: F401 — loads .env.local
+
 import knowledge_store
-from data.documents import DOCUMENTS
-from data.customers import CUSTOMERS
+from data.complaints import get_complaint
+from data.customers import get_customer
 
 RELEVANCE_FLOOR = float(os.environ["RELEVANCE_FLOOR"])
 ACK_WINDOW_DAYS = int(os.environ.get("ACK_WINDOW_DAYS", "3"))
 RESPONSE_WINDOW_DAYS = int(os.environ.get("RESPONSE_WINDOW_DAYS", "56"))
+
 
 def search_knowledge(query: str, top_k: int = 3) -> list[dict] | dict:
     try:
@@ -15,7 +20,32 @@ def search_knowledge(query: str, top_k: int = 3) -> list[dict] | dict:
 
 
 def check_sla_status(complaint_id: int) -> dict:
-    pass
+    complaint = get_complaint(complaint_id)
+    if complaint is None:
+        return {
+            "error": "unknown_complaint_id",
+            "detail": f"Complaint {complaint_id} not found",
+        }
+
+    customer = get_customer(complaint["customer_id"])
+    is_vulnerable = bool(customer and customer["vulnerability_flag"])
+
+    opened = date.fromisoformat(complaint["opened_date"])
+    days_elapsed = (date.today() - opened).days
+
+    return {
+        "complaint_id": complaint["id"],
+        "opened_date": complaint["opened_date"],
+        "status": complaint["status"],
+        "days_elapsed": days_elapsed,
+        "ack_window_days": ACK_WINDOW_DAYS,
+        "response_window_days": RESPONSE_WINDOW_DAYS,
+        "ack_breached": days_elapsed > ACK_WINDOW_DAYS,
+        "response_breached": days_elapsed > RESPONSE_WINDOW_DAYS,
+        "days_until_response_deadline": RESPONSE_WINDOW_DAYS - days_elapsed,
+        "is_vulnerable_customer": is_vulnerable,
+    }
+
 
 def find_similar_complaints():
     pass
