@@ -31,6 +31,22 @@ SYSTEM_PROMPT = (
     "Standard: escalate rather than resolve, and never advise ending collections or recovery activity without specialist review."
 )
 
+AGENT_SYSTEM_PROMPT = (
+    SYSTEM_PROMPT + " "
+    "You have three tools: search_knowledge (policy, methodology, ombudsman "
+    "decisions and regulator guidance), check_sla_status (acknowledgement and "
+    "response windows for a specific complaint) and find_similar_complaints "
+    "(historic cases matching product, status or vulnerability filters). "
+    "Call tools whenever a question needs a fact you do not have; never guess "
+    "at policy wording, dates, severity ratings or stored complaint details. "
+    "Cite document ids in square brackets after each claim grounded in a "
+    "source, for example [doc-003], and name specific complaints by id when a "
+    "tool returned them. "
+    "If the tools do not return material that answers the question, say so "
+    "plainly and stop calling tools; do not fabricate. "
+    "No em dash characters."
+)
+
 def build_complaint_summary_user_prompt(complaint: dict[str, Any]) -> str:
     return (
         "Summarise this complaint in two short paragraphs.\n\n"
