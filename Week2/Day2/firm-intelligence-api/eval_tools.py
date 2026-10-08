@@ -5,7 +5,7 @@ Small, pure helpers for scoring. No network and no model.
 import re
 from grounding import is_refusal,  normalise # one definition of refusal
 
-def contain_evidence(chunk_text: str, evidence: str) -> bool:
+def contains_evidence(chunk_text: str, evidence: str) -> bool:
     """
     True if the chunk holds the whole evidence span, 
     Line break never break a match
