@@ -1,6 +1,6 @@
 from datetime import date
 
-from data.complaints import COMPLAINTS
+from data.complaints import COMPLAINTS, get_complaint
 from data.enums import Channel, ComplaintStatus, ProductType, Severity
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
@@ -25,11 +25,12 @@ class ComplaintUpdate(BaseModel):
     severity: Severity | None = None
     summary: str | None = None
 
-def get_complaint_or_404(complaint_id:int) -> Complaint:
-    for complaint in COMPLAINTS:
-        if complaint["id"] == complaint_id:
-            return complaint
-    raise HTTPException(404, f"complain with {complaint_id} id does not exists.")
+def get_complaint_or_404(complaint_id: int) -> dict:
+    """HTTP wrapper: 404 if not found"""
+    complaint = get_complaint(complaint_id)
+    if complaint is None:
+        raise HTTPException(404, f"complaint with id {complaint_id} does not exist.")
+    return complaint
 
 @router.get("")
 def list_complaints(
@@ -49,7 +50,7 @@ def list_complaints(
     return results
 
 @router.get("/{complaint_id}")
-def get_complaint(complaint:Complaint=Depends(get_complaint_or_404)):
+def get_complaint_by_id(complaint:Complaint=Depends(get_complaint_or_404)):
     return complaint
 
 @router.post("", status_code=201)

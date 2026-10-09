@@ -48,3 +48,8 @@ CUSTOMERS: list[dict[str, Any]] = [
         "vulnerability_flag": False,
     },
 ]
+
+
+def get_customer(customer_id: int) -> dict[str, Any] | None:
+    """Pure lookup. Returns the customer dict or None"""
+    return next((c for c in CUSTOMERS if c["id"] == customer_id), None)

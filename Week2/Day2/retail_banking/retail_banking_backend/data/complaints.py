@@ -122,3 +122,8 @@ COMPLAINTS: list[dict[str, Any]] = [
         ),
     },
 ]
+
+
+def get_complaint(complaint_id: int) -> dict[str, Any] | None:
+    """Pure lookup. Returns the complaint dict or None"""
+    return next((c for c in COMPLAINTS if c["id"] == complaint_id), None)

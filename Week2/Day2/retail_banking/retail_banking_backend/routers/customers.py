@@ -1,5 +1,5 @@
 from data.complaints import COMPLAINTS
-from data.customers import CUSTOMERS
+from data.customers import CUSTOMERS, get_customer
 from data.enums import CustomerSegment
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
@@ -19,11 +19,12 @@ class CustomerUpdate(BaseModel):
     segment : CustomerSegment | None = None
     vulnerability_flag: bool | None = None
 
-def get_customer_or_404(customer_id:int) -> dict:
-    for customer in CUSTOMERS:
-        if customer["id"] == customer_id:
-            return customer
-    raise HTTPException(404, f"customer with id {customer_id} does not exist.")
+def get_customer_or_404(customer_id: int) -> dict:
+    """HTTP wrapper: 404 if not found"""
+    customer = get_customer(customer_id)
+    if customer is None:
+        raise HTTPException(404, f"customer with id {customer_id} does not exist.")
+    return customer
 
 @router.get("")
 def list_customers(segment:CustomerSegment | None = None, vulnerability_flag: bool | None = None):
