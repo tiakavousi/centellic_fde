@@ -33,7 +33,7 @@ SYSTEM_PROMPT = (
 
 AGENT_SYSTEM_PROMPT = (
     SYSTEM_PROMPT + " "
-    "You have three tools: search_knowledge (policy, methodology, ombudsman "
+    "You have three tools: search_knowledge_base (policy, methodology, ombudsman "
     "decisions and regulator guidance), check_sla_status (acknowledgement and "
     "response windows for a specific complaint) and find_similar_complaints "
     "(historic cases matching product, status or vulnerability filters). "

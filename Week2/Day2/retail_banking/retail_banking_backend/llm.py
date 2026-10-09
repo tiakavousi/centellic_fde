@@ -106,6 +106,27 @@ def generate_structured(system: str, user: str, response_model: type[BaseModel],
         "stop_reason": response.stop_reason,
     }
 
+def generate_with_tools(
+      system: str,
+      messages: list[dict],
+      tools: list[dict],
+      max_tokens: int = MAX_TOKENS,
+  ):
+      """
+      One tool-use turn. Returns the raw response so the caller can inspect
+      content blocks, stop_reason, and usage. The caller owns the loop.
+      """
+      try:
+          return get_client().messages.create(
+              model=MODEL,
+              max_tokens=max_tokens,
+              system=system,
+              messages=messages,
+              tools=tools,
+          )
+      except anthropic.APIError as e:
+          raise handle_anthropic_error(e)
+
 
 def handle_anthropic_error(exc: Exception) -> HTTPException:
     """
