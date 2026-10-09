@@ -50,7 +50,7 @@ def list_complaints(
     return results
 
 @router.get("/{complaint_id}")
-def get_complaint(complaint:Complaint=Depends(get_complaint_or_404)):
+def get_complaint_by_id(complaint:Complaint=Depends(get_complaint_or_404)):
     return complaint
 
 @router.post("", status_code=201)
