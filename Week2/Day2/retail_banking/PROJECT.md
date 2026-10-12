@@ -25,8 +25,10 @@ retail banking.
   clears the relevance floor or when the question asks for a specific
   redress amount.
 - **Tools available to the agent:**
-  1. `search_knowledge` — vector search over the document corpus.
-  2. `find_similar_complaints` — surfaces historic complaints with matching
+  1. `search_knowledge_base` — vector search over the document corpus.
+  2. `check_sla_status` — computes SLA aging for a complaint from its
+     `opened_date` and status, flagging breaches.
+  3. `find_similar_complaints` — surfaces historic complaints with matching
      theme/product to drive consistent outcomes.
 - **Never** closes a complaint, sets a £ redress amount, or issues a binding
   remedy — it only recommends. Human sign-off is required.
@@ -58,17 +60,21 @@ customers by `segment` / `vulnerability_flag`.
    and loads config (model, iteration limit, relevance floor) from env.
 2. **Agent loop starts** — Claude receives the question, the system prompt
    (refusal rules, tool contract) and the tool schemas for
-   `search_knowledge` and `find_similar_complaints`.
-3. **Tool: search_knowledge** — Voyage embeds the query, Chroma returns
-   top-k docs, results below the relevance floor are dropped. Empty result
-   → Claude must refuse.
-4. **Tool: find_similar_complaints** — filters the complaints store by
+   `search_knowledge_base`, `check_sla_status` and
+   `find_similar_complaints`.
+3. **Tool: search_knowledge_base** — Voyage embeds the query, Chroma
+   returns top-k docs, results below the relevance floor are dropped.
+   Empty result → Claude must refuse.
+4. **Tool: check_sla_status** — reads the complaint by id, computes aging
+   from `opened_date` versus the policy SLA for its severity, and returns
+   `{days_open, sla_days, breached}`.
+5. **Tool: find_similar_complaints** — filters the complaints store by
    product / theme, joins customer for vulnerability, returns matching
    records.
-5. **Iterate** — Claude may call tools multiple times. Loop exits on final
+6. **Iterate** — Claude may call tools multiple times. Loop exits on final
    answer or when `MAX_ITERATIONS` is reached (returns `completed: false`).
-6. **Guardrails checked** — no £ redress amounts, no autonomous closure,
+7. **Guardrails checked** — no £ redress amounts, no autonomous closure,
    refuse when no source clears the floor or when a vulnerable-customer
    question lacks the relevant policy doc.
-7. **Response out** — `{ answer, citations, tool_calls, tokens,
+8. **Response out** — `{ answer, citations, tool_calls, tokens,
    iterations, completed }`.

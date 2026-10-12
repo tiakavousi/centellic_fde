@@ -2,7 +2,6 @@ import json
 
 import agent_tools
 import config  # noqa: F401 — loads .env.local
-import knowledge
 from agent_tools import SEARCH_TOOLS
 from llm import generate_with_tools
 from prompts.prompts import AGENT_SYSTEM_PROMPT
@@ -10,7 +9,25 @@ from prompts.prompts import AGENT_SYSTEM_PROMPT
 MAX_ITERATIONS = 4
 
 def ask_with_tools(question: str) -> dict:
-    """Run the tool-use loop until the model answers, or the limit is hit."""
+    """Run the Claude tool-use loop for a single user question.
+
+    Sends the question with AGENT_SYSTEM_PROMPT and SEARCH_TOOLS. On each turn:
+    if the model stops with anything other than 'tool_use', the loop returns
+    the final text; otherwise it executes every tool_use block via _execute_tool,
+    appends the tool_result blocks back to the conversation, and continues.
+    Tool failures (unknown tool, missing args, exceptions inside a tool) are
+    reported back to the model as tool_result with is_error=True rather than
+    raised, so the model can recover or refuse. Only successful tool executions
+    count toward tool_calls_made. If MAX_ITERATIONS is reached without a final
+    answer, the loop returns complete=False with a sentinel message.
+
+    Args:
+        question: The user's natural-language question.
+
+    Returns:
+        {answer, complete, tool_calls_made, input_tokens, output_tokens, stop_reason}.
+        input_tokens and output_tokens are summed across every turn in the loop.
+    """
 
     messages = [{"role": "user", "content": question}]
     total_input_tokens = 0
@@ -74,14 +91,13 @@ def _execute_tool(name: str, tool_input: dict) -> tuple[str, bool]:
     if name == "search_knowledge_base":
         if "query" not in tool_input:
             return 'Error: missing required field "query"', True
-        try:
-            results = knowledge.search(tool_input["query"], top_k=3)
-        except RuntimeError as e:
-            return f"Error: {e}", True
+        results = agent_tools.search_knowledge_base(tool_input["query"], top_k=3)
+        if isinstance(results, dict) and "error" in results:
+            return f"Error: {results['detail']}", True
         if not results:
             return "No relevant documents found", False
         formatted = "\n\n".join(
-            f"[{r['id']}] {r['title']} (score {r['score']:.2f})\n{r['text']}"
+            f"[{r['id']}] {r['title']} (score {r['score']:.2f})\n{r['body']}"
             for r in results
         )
         return formatted, False
@@ -92,5 +108,15 @@ def _execute_tool(name: str, tool_input: dict) -> tuple[str, bool]:
             return 'Error: missing "complaint_id"', True
         result = agent_tools.check_sla_status(cid)
         return json.dumps(result, default=str), False
+
+    if name == "find_similar_complaints":
+        result = agent_tools.find_similar_complaints(
+            product=tool_input.get("product"),
+            theme=tool_input.get("theme"),
+            vulnerable_only=tool_input.get("vulnerable_only", False),
+            limit=tool_input.get("limit", agent_tools.DEFAULT_SIMILAR_RESULTS),
+        )
+        is_error = "error" in result
+        return json.dumps(result, default=str), is_error
 
     return f"Unknown tool: {name}", True
