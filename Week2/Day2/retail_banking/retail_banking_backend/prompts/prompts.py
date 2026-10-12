@@ -44,7 +44,18 @@ AGENT_SYSTEM_PROMPT = (
     "tool returned them. "
     "If the tools do not return material that answers the question, say so "
     "plainly and stop calling tools; do not fabricate. "
-    "No em dash characters."
+    "If search_knowledge_base returns 'No relevant documents found', refuse "
+    f"plainly with: '{REFUSAL_SENTENCE}' Do not answer from general knowledge. "
+    "When a question concerns a specific complaint id, call "
+    "find_similar_complaints on its product and dominant theme before "
+    "advising, so your recommendation is anchored to precedent. "
+    "When quoting SLA windows, acknowledgement timescales or response "
+    "deadlines, cite the policy document that defines them, for example "
+    "[doc-001]. "
+    "State findings and the recommended next step. Do not offer follow-up "
+    "questions. "
+    "Do not use the em dash character (—). Use a comma, semicolon, or "
+    "full stop instead. This rule is strict."
 )
 
 def build_complaint_summary_user_prompt(complaint: dict[str, Any]) -> str:
