@@ -1,6 +1,14 @@
 """
 One chroma collection per chunking strategy. so that strategies can be compaired side by side
 If either changes , the collection will be rebuilt from the scratch.
+
+WRITE (run once, free if nothing changed)
+chunking.py  ->  chunk_corpus  ->  build  ->  embed_batched  ->  Voyage  ->  Chroma "chunks_<strategy>"
+
+
+READ (run for every question)
+question vector  ->  search_with_vectors  ->  Chroma "chunks_<strategy>"  ->  ranked hits
+
 """
 
 import chromadb
@@ -33,7 +41,7 @@ def embed_batched(texts: list[str], input_type: str) -> tuple[list[list[float]],
     """
     embed every number of texts in batches, return all vectors and total token count .
     """
-    vectors = list[list[float]] = []
+    vectors: list[list[float]] = []
     tokens = 0
 
     for start in range(0, len(texts), BATCH_SIZE):
@@ -84,14 +92,14 @@ def build(startegy: str, force: bool = False) -> dict:
         }
 
     # part 2 : rebuild
-    #   Upsert would be fine only if you could guarantee chunk IDs are stable and the set never shrinks — 
+    #   Upsert would be fine only if you could guarantee chunk IDs are stable and the set never shrinks —
     # which isn't true when the chunking strategy, chunk size, or source corpus can change.
-    # se we need to delete the collection 
+    # se we need to delete the collection
     # Drop the whole collection instead of upserting: chunk IDs/counts can change
     # across rebuilds (new corpus, different chunker), and upsert would leave
     # orphaned chunks from the previous build behind.
     try:
-        chroma.delete_collection(collection_name)
+        chroma.delete_collection(collection_name(startegy))
     except Exception:
         pass
 
@@ -107,8 +115,53 @@ def build(startegy: str, force: bool = False) -> dict:
         ],
     )
     return {
-        "startegy": startegy,
+        "strategy": startegy,
         "chunks": len(chunks),
-        "tokens": tokens,
-        "rebuild": True,
+        "embedding_tokens": tokens,
+        "rebuilt": True,
     }
+
+
+# search_with_vectors
+# the read side
+# it takes the question vectors that are already embeded , so enqueries are embeded once and reused across all 6 categories
+def search_with_vectors(
+    startegy: str, query_vectors: list[list[float]], k: int
+) -> list[list[dict]]:
+    # k: how many chunks to return per question
+    """
+    we embed the question once, then searches many strategies with the same vectors.
+    """
+
+    col = collection_for(startegy)
+    if col.count() == 0:
+        raise RuntimeError(f"Index for '{startegy}' is empty, build it first)")
+
+    # the search
+    result = col.query(query_embeddings=query_vectors, n_results=min(k, col.count())) 
+    # what result looks like
+        # - result["ids"] - a list of 2 lists, each holding 3 ids
+        # - result["documents"] - a list of 2 lists, each holding 3 texts
+        # - result["metadatas"] - a list of 2 lists, each holding 3 metadata dictionaires
+        # - result["diatances"] - a list of 2 lists, each holding 3 distances
+        # e.g. ids            ['doc-001#00', 'doc-101#01', 'doc-107#00']
+        # e.g. distances      [0.375, 0.389, 0.30]
+    return [
+        # chroma returns 4 parallel nested list
+        [
+            {
+                "id": meta["doc_id"],
+                "chunk_id": chunk_id,
+                "title": meta["title"],
+                "text": text,
+                "score": 1 - distance,
+            }
+            for chunk_id, text, meta, distance in zip(ids, docs, metas, dists)
+        ]
+        for ids, docs, metas, dists in zip(
+            result["ids"],
+            result["documents"],
+            result["metadatas"],
+            result["distances"],
+        )
+    ]
