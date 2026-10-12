@@ -41,7 +41,7 @@ def embed_batched(texts: list[str], input_type: str) -> tuple[list[list[float]],
     """
     embed every number of texts in batches, return all vectors and total token count .
     """
-    vectors = list[list[float]] = []
+    vectors: list[list[float]] = []
     tokens = 0
 
     for start in range(0, len(texts), BATCH_SIZE):
@@ -99,7 +99,7 @@ def build(startegy: str, force: bool = False) -> dict:
     # across rebuilds (new corpus, different chunker), and upsert would leave
     # orphaned chunks from the previous build behind.
     try:
-        chroma.delete_collection(collection_name)
+        chroma.delete_collection(collection_name(startegy))
     except Exception:
         pass
 
@@ -115,17 +115,17 @@ def build(startegy: str, force: bool = False) -> dict:
         ],
     )
     return {
-        "startegy": startegy,
+        "strategy": startegy,
         "chunks": len(chunks),
-        "tokens": tokens,
-        "rebuild": True,
+        "embedding_tokens": tokens,
+        "rebuilt": True,
     }
 
 
 # search_with_vectors
 # the read side
 # it takes the question vectors that are already embeded , so enqueries are embeded once and reused across all 6 categories
-def search_wih_vectors(
+def search_with_vectors(
     startegy: str, query_vectors: list[list[float]], k: int
 ) -> list[list[dict]]:
     # k: how many chunks to return per question
