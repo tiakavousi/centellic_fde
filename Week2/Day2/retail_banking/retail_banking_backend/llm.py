@@ -2,6 +2,7 @@ import os
 from collections.abc import Iterator
 from functools import lru_cache
 from typing import Any
+import logging
 
 import anthropic
 import config  # noqa: F401 — loads .env.local
@@ -128,24 +129,24 @@ def generate_with_tools(
           raise handle_anthropic_error(e)
 
 
+log = logging.getLogger(__name__)
+
 def handle_anthropic_error(exc: Exception) -> HTTPException:
     """
-        Maps Anthropic SDK exceptions to HTTP responses: 
-        APITimeoutError → 504, 
-        RateLimitError → 429, 
-        everything else → 502. 
+        Maps Anthropic SDK exceptions to HTTP responses:
+        APITimeoutError → 504,
+        RateLimitError → 429,
+        everything else → 502.
         Called by every endpoint that touches Claude.
     """
-    if isinstance(exc,anthropic.APITimeoutError):
+    log.exception(
+        "Anthropic call failed: type=%s status=%s message=%s",
+        type(exc).__name__,
+        getattr(exc, "status_code", None),
+        getattr(exc, "message", str(exc)),
+    )
+    if isinstance(exc, anthropic.APITimeoutError):
         return HTTPException(504, "Upstream Model Timeout Error")
     if isinstance(exc, anthropic.RateLimitError):
         return HTTPException(429, "Upstream Model Rate Limit Error")
     return HTTPException(502, "Upstream Model Error")
-
-def estimate_input_tokens(system: str, user: str) -> int:
-    counted = get_client().messages.count_tokens(
-        model= MODEL,
-        system=system,
-        messages=[{'role': 'user', 'content':user}]
-    )
-    return counted.input_tokens
