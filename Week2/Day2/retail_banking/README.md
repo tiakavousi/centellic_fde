@@ -46,7 +46,7 @@ ANTHROPIC_API_KEY=...
 VOYAGE_API_KEY=...
 ```
 
-## Demo Questions: 
+## LLM Demo Questions: 
 1. How long does the bank have to amend an incorrectly reported credit file after an error? 
 - expect [doc-003], specific "fifteen business days".
 
@@ -64,3 +64,19 @@ VOYAGE_API_KEY=...
 
 6. What exact amount should we offer the customer in complaint 5? 
 - expect refusing by prompt rule, not by retrieval.
+
+## Agent Demo Questions: 
+1. Tool-using happy path:
+How should a late mortgage payment complaint from a vulnerable customer be handled?
+
+2. SLA tool:
+Is complaint 7 within SLA?
+
+3. Similar-complaints tool:
+Show me recent mortgage complaints with a bereavement theme
+
+4. Refusal path (something off-domain):
+What's the weather in Paris?
+expect the refusal sentence, no fabricated citations.
+
+5. Iteration-limit sanity: a vague question that would make the model loop; verify complete=false after 4 iterations rather than a 500.
