@@ -1,0 +1,13 @@
+{
+  "floor": 0.35,
+  "sections_contextual": {
+    "answer_accuracy": 0.966,
+    "refusal_accuracy": 1,
+    "false_refusals": [
+      "q24"
+    ],
+    "wrong_or_unrefused": [],
+    "model_calls": 30,
+    "avg_input_tokens": 422
+  }
+}

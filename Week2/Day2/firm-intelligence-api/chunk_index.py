@@ -105,6 +105,7 @@ def build(startegy: str, force: bool = False) -> dict:
 
     col = collection_for(startegy)
     vectors, tokens = embed_batched([c["text"] for c in chunks], input_type="document")
+
     col.upsert(
         ids=[c["id"] for c in chunks],
         embeddings=vectors,
@@ -114,6 +115,15 @@ def build(startegy: str, force: bool = False) -> dict:
             for c in chunks
         ],
     )
+    # things to note:
+        # embed_texts is imported not rewritten ... embedding provider has not changed only the storage has
+        # configuration=.... -> not optional , we are choosing something different from default 
+        # chroma returns distance, we return similarity
+            # in chroma lower is better 
+            # in our implementation higher is better
+            # 1 - distance converts  it to similarity
+        # upsert instead of add -> add fails on an id that already exists, upsert overwrites
+
     return {
         "strategy": startegy,
         "chunks": len(chunks),
