@@ -1,0 +1,3 @@
+"""
+knowledge endpoints tests
+"""
