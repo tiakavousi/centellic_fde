@@ -186,5 +186,5 @@ def cosine_for(
     stored = collection_for(strategy).get(ids=chunk_ids, include=["embeddings"])
     return {
         chunk_id : float(knowledge.cosine_similarity(query_vector, list(vector)))
-        for chunk_id, vector in zip(stored["ids"], stored["embedings"])
+        for chunk_id, vector in zip(stored["ids"], stored["embeddings"])
     }

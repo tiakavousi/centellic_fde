@@ -30,7 +30,7 @@ class BM25Index:
             raise ValueError("cannot build a keyword index from zero chunks")
         # count everything upfront
         self.chunks = chunks
-        self.term_counts = [Counter(tokenize(c["text"] for c in chunks))]
+        self.term_counts = [Counter(tokenize(c["text"])) for c in chunks]
         self.lengths = [sum(counts.values()) for counts in self.term_counts]
         self.avg_length = sum(self.lengths) / len(chunks)
         self.doc_freq = Counter()

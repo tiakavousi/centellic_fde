@@ -2,7 +2,7 @@
 Hybrid search: vector search and keyword search, merged by rank.
 """
 
-from fucntools import lru_cache
+from functools import lru_cache
 
 import bm25
 import chunk_index
@@ -81,10 +81,9 @@ def search_with_vector(strategy: str, question: str, query_vector: list[float], 
                 "text": chunk["text"],
                 "score": extra_cosine[chunk_id]
             }
-            # our 3 extra fields
-            hit["found_by"] = [name for name, found in (("vector", chunk_id in by_vector), ("keyword", chunk_id in by_keyword)) if found]
-            hit["exact_match"] = bool(wanted & set(bm25.tokenize(hit["text"])))
-            hit["rrf"] = round(rrf, 5)
-            hits.append(hit)
+        hit["found_by"] = [name for name, found in (("vector", chunk_id in by_vector), ("keyword", chunk_id in by_keyword)) if found]
+        hit["exact_match"] = bool(wanted & set(bm25.tokenize(hit["text"])))
+        hit["rrf"] = round(rrf, 5)
+        hits.append(hit)
 
-        return hits
+    return hits
