@@ -2,9 +2,11 @@
 # embedding provider has not changed , only where the vectors get stored
 import knowledge
 import chunk_index
+import hybrid
 
 # our chosen chunking startegy
 CHUNK_STARTEGY = "sections_contextual"
+SEARCH_MODE = "hybrid"
 
 
 def count()->int:
@@ -23,7 +25,11 @@ def search(question: str, top_k: int = 3) -> list:
     """
     if count() == 0:
       raise RuntimeError("Index is empty, call POST /knowledge/index first")
-    
-    query_vector, _ = knowledge.embed_texts(question, input_type="query")
 
-    return chunk_index.search_with_vectors(CHUNK_STARTEGY, query_vector, k=top_k)[0]
+    query_vectors, _ = knowledge.embed_texts(question, input_type="query")
+
+    if SEARCH_MODE == "hybrid":
+        return hybrid.search_with_vector(CHUNK_STARTEGY, question, query_vectors[0], top_k)
+    
+    return chunk_index.search_with_vectors(CHUNK_STARTEGY, query_vectors, k=top_k)[0]
+
