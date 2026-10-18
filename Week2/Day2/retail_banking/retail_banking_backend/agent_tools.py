@@ -3,18 +3,52 @@ from datetime import date
 
 import config  # noqa: F401 — loads .env.local
 import knowledge_store
-from data.complaints import COMPLAINTS, get_complaint
-from data.customers import get_customer
+from data.complaints import COMPLAINTS, get_complaint as get_complaint_record
+from data.customers import get_customer  # used by get_complaint and find_similar_complaints
 from data.enums import ProductType
+
+"""
+┌──────────────────────────────┬─────────────────────────────────────────────────────────────┐
+│             Tool             │                             Job                             │
+├──────────────────────────────┼─────────────────────────────────────────────────────────────┤
+│ get_complaint(id)            │ Fetch one complaint + its customer (vulnerability, segment) │
+├──────────────────────────────┼─────────────────────────────────────────────────────────────┤
+│ check_sla_status(id)         │ SLA math only — no customer join                            │
+├──────────────────────────────┼─────────────────────────────────────────────────────────────┤
+│ find_similar_complaints(...) │ Historic cases for outcome consistency                      │
+├──────────────────────────────┼─────────────────────────────────────────────────────────────┤
+│ search_knowledge_base(query) │ Policy, guidance, ombudsman decisions                       │
+└──────────────────────────────┴─────────────────────────────────────────────────────────────┘
+"""
 
 MAX_SIMILAR_RESULTS = 10
 DEFAULT_SIMILAR_RESULTS = 5
 
 RELEVANCE_FLOOR = float(os.environ["RELEVANCE_FLOOR"])
+
+# ACK_WINDOW_DAYS is the number of days the bank has to send an initial 
+# acknowledgement to the customer after a complaint is received.
 ACK_WINDOW_DAYS = int(os.environ.get("ACK_WINDOW_DAYS", "3"))
+
+# maximum number of days the bank has to send a final response to the customer resolving the complaint.
 RESPONSE_WINDOW_DAYS = int(os.environ.get("RESPONSE_WINDOW_DAYS", "56"))
 
 SEARCH_TOOLS = [
+    {
+        "name": "get_complaint",
+        "description": (
+            "Fetch a single complaint by id, including the customer's "
+            "vulnerability flag and segment. Call this first when a question "
+            "names a specific complaint id."
+        ),
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "complaint_id": {"type": "integer"},
+            },
+            "required": ["complaint_id"],
+        },
+    },
     {
         "name": "search_knowledge_base",
         "description": (
@@ -79,13 +113,33 @@ SEARCH_TOOLS = [
 ]
 
 # tool 1
+def get_complaint(complaint_id: int) -> dict:
+    """Fetch one complaint and its customer. Returns {error, detail} if id unknown."""
+    complaint = get_complaint_record(complaint_id)
+    if complaint is None:
+        return {"error": "unknown_complaint_id", "detail": f"Complaint {complaint_id} not found"}
+    customer = get_customer(complaint["customer_id"])
+    return {
+        "id": complaint["id"],
+        "product": complaint["product"].value,
+        "channel": complaint["channel"].value,
+        "severity": complaint["severity"].value,
+        "status": complaint["status"].value,
+        "opened_date": complaint["opened_date"],
+        "summary": complaint["summary"],
+        "customer": {
+            "id": customer["id"],
+            "name": customer["name"],
+            "segment": customer["segment"].value,
+            "vulnerability_flag": customer["vulnerability_flag"],
+        } if customer else None,
+    }
+
+
+# tool 2
 def search_knowledge_base(query: str, top_k: int = 3) -> list[dict] | dict:
     """
     Search the knowledge base and keep hits at or above the relevance floor.
-
-    Embeds the query via Voyage, queries Chroma for the top_k nearest documents,
-    then drops any result whose score is below RELEVANCE_FLOOR. Returning an empty
-    list is the signal the agent should refuse: no source cleared the floor.
 
     Args:
         query: Natural-language search query.
@@ -101,31 +155,12 @@ def search_knowledge_base(query: str, top_k: int = 3) -> list[dict] | dict:
         return {"error": "search_failed", "detail": str(e)}
 
 
-# tool 2
+# tool 3
 def check_sla_status(complaint_id: int) -> dict:
-    """
-    Compute SLA aging and breach flags for a single complaint.
-
-    Looks up the complaint by id, computes days elapsed since opened_date, and
-    compares against the acknowledgement window (ACK_WINDOW_DAYS) and the final
-    response window (RESPONSE_WINDOW_DAYS). Also joins the customer to surface
-    vulnerability, since vulnerable-customer SLAs are treated more strictly by
-    handlers.
-
-    Args:
-        complaint_id: The complaint id to inspect.
-
-    Returns a dict of response including the SLA compute or {error, detail} if the complaint id is unknown.
-    """
-    complaint = get_complaint(complaint_id)
+    """Compute SLA aging and breach flags for a single complaint. SLA math only."""
+    complaint = get_complaint_record(complaint_id)
     if complaint is None:
-        return {
-            "error": "unknown_complaint_id",
-            "detail": f"Complaint {complaint_id} not found",
-        }
-
-    customer = get_customer(complaint["customer_id"])
-    is_vulnerable = bool(customer and customer["vulnerability_flag"])
+        return {"error": "unknown_complaint_id", "detail": f"Complaint {complaint_id} not found"}
 
     opened = date.fromisoformat(complaint["opened_date"])
     days_elapsed = (date.today() - opened).days
@@ -140,10 +175,9 @@ def check_sla_status(complaint_id: int) -> dict:
         "ack_breached": days_elapsed > ACK_WINDOW_DAYS,
         "response_breached": days_elapsed > RESPONSE_WINDOW_DAYS,
         "days_until_response_deadline": RESPONSE_WINDOW_DAYS - days_elapsed,
-        "is_vulnerable_customer": is_vulnerable,
     }
 
-# tool 3
+# tool 4
 def find_similar_complaints(
     product: str | None = None,
     theme: str | None = None,
