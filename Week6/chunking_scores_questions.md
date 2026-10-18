@@ -1,3 +1,33 @@
+Building indexes (free if nothing has changed)...
+  whole_document          16 chunks  up to date       0 tokens
+  fixed_100               46 chunks  up to date       0 tokens
+  fixed_overlap_25        55 chunks  up to date       0 tokens
+  sentences_100           49 chunks  up to date       0 tokens
+  sections_plain          71 chunks  up to date       0 tokens
+  sections_contextual     71 chunks  up to date       0 tokens
+
+Embedded 32 questions once (382 tokens), reused for every strategy.
+
+strategy                 R@1   R@3   R@5    MRR  ctx words  top ans  top unans
+------------------------------------------------------------------------------
+whole_document          0.69  1.00  1.00   0.84        862     0.56       0.43
+fixed_100               0.48  0.79  0.90   0.61        273     0.60       0.49
+fixed_overlap_25        0.52  0.93  0.97   0.67        277     0.61       0.50
+sentences_100           0.41  0.76  0.90   0.57        262     0.60       0.50
+sections_plain          0.31  0.86  0.93   0.54        186     0.61       0.52
+sections_contextual     0.86  1.00  1.00   0.93        197     0.66       0.50
+
+Missed at k=3:
+  whole_document         none
+  fixed_100              q02, q05, q08, q09, q22, q26
+  fixed_overlap_25       q02, q09
+  sentences_100          q02, q03, q04, q08, q09, q20, q22
+  sections_plain         q02, q04, q09, q22
+  sections_contextual    none
+
+
+-----------------------------------------------------------------------------------
+
 1. Is chunking worth it? Compare whole_document with your best chunked strategy on MRR and on ctx words. 
 
 Yes. sections_contextual beats whole_document on MRR (0.93 vs 0.84) and R@1 (0.86 vs 0.69), while using ~4× less context (197 vs 862 words). Chunking buys you both better ranking and cheaper prompts.

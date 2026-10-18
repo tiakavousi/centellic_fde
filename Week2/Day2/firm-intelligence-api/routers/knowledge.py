@@ -3,6 +3,7 @@ from pydantic import BaseModel, Field
 import knowledge_store as knowledge
 from anthropic import APIStatusError,APITimeoutError,RateLimitError
 import grounding
+import hybrid
 import llm
 
 
@@ -27,7 +28,7 @@ def rebuild_index():
 @router.post("/search")
 def search_query(query: Question):
     try:
-        return knowledge.search(query.question, query.top_k)
+        return {"results": knowledge.search(query.question, query.top_k)}
     except RuntimeError as e:
         raise HTTPException(status_code=409, detail=str(e))
 
@@ -52,7 +53,7 @@ def ask(q:Question):
     
     # 2. Filter, and decide whether to make a call to the model at all
     # (compare against the RELEVANCE_FLOOR)
-    usable = [hit for hit in hits if hit["score"] >= RELEVANCE_FLOOR]
+    usable = [hit for hit in hits if hybrid.is_usable(hit, RELEVANCE_FLOOR)]
 
     if not usable:
         return {

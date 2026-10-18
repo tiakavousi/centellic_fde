@@ -105,6 +105,7 @@ def build(startegy: str, force: bool = False) -> dict:
 
     col = collection_for(startegy)
     vectors, tokens = embed_batched([c["text"] for c in chunks], input_type="document")
+
     col.upsert(
         ids=[c["id"] for c in chunks],
         embeddings=vectors,
@@ -114,6 +115,15 @@ def build(startegy: str, force: bool = False) -> dict:
             for c in chunks
         ],
     )
+    # things to note:
+    # embed_texts is imported not rewritten ... embedding provider has not changed only the storage has
+    # configuration=.... -> not optional , we are choosing something different from default
+    # chroma returns distance, we return similarity
+    # in chroma lower is better
+    # in our implementation higher is better
+    # 1 - distance converts  it to similarity
+    # upsert instead of add -> add fails on an id that already exists, upsert overwrites
+
     return {
         "strategy": startegy,
         "chunks": len(chunks),
@@ -138,14 +148,14 @@ def search_with_vectors(
         raise RuntimeError(f"Index for '{startegy}' is empty, build it first)")
 
     # the search
-    result = col.query(query_embeddings=query_vectors, n_results=min(k, col.count())) 
+    result = col.query(query_embeddings=query_vectors, n_results=min(k, col.count()))
     # what result looks like
-        # - result["ids"] - a list of 2 lists, each holding 3 ids
-        # - result["documents"] - a list of 2 lists, each holding 3 texts
-        # - result["metadatas"] - a list of 2 lists, each holding 3 metadata dictionaires
-        # - result["diatances"] - a list of 2 lists, each holding 3 distances
-        # e.g. ids            ['doc-001#00', 'doc-101#01', 'doc-107#00']
-        # e.g. distances      [0.375, 0.389, 0.30]
+    # - result["ids"] - a list of 2 lists, each holding 3 ids
+    # - result["documents"] - a list of 2 lists, each holding 3 texts
+    # - result["metadatas"] - a list of 2 lists, each holding 3 metadata dictionaires
+    # - result["diatances"] - a list of 2 lists, each holding 3 distances
+    # e.g. ids            ['doc-001#00', 'doc-101#01', 'doc-107#00']
+    # e.g. distances      [0.375, 0.389, 0.30]
     return [
         # chroma returns 4 parallel nested list
         [
@@ -165,3 +175,16 @@ def search_with_vectors(
             result["distances"],
         )
     ]
+
+
+def cosine_for(
+    strategy: str, query_vector: list[float], chunk_ids: list[str]
+) -> dict[str, float]:
+    if not chunk_ids:
+        return {}
+
+    stored = collection_for(strategy).get(ids=chunk_ids, include=["embeddings"])
+    return {
+        chunk_id : float(knowledge.cosine_similarity(query_vector, list(vector)))
+        for chunk_id, vector in zip(stored["ids"], stored["embeddings"])
+    }

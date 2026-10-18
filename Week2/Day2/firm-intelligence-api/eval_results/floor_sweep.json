@@ -1,0 +1,126 @@
+{
+  "floors": [
+    0.3,
+    0.35,
+    0.4,
+    0.45,
+    0.5,
+    0.55,
+    0.6,
+    0.65
+  ],
+  "results": {
+    "sections_contextual": {
+      "0.30": {
+        "answer_accuracy": 0.966,
+        "refusal_accuracy": 1,
+        "false_refusals": [
+          "q24"
+        ],
+        "wrong_or_unrefused": [],
+        "model_calls": 30,
+        "avg_input_tokens": 422
+      },
+      "0.35": {
+        "answer_accuracy": 0.966,
+        "refusal_accuracy": 1,
+        "false_refusals": [
+          "q24"
+        ],
+        "wrong_or_unrefused": [],
+        "model_calls": 30,
+        "avg_input_tokens": 422
+      },
+      "0.40": {
+        "answer_accuracy": 0.966,
+        "refusal_accuracy": 1,
+        "false_refusals": [
+          "q24"
+        ],
+        "wrong_or_unrefused": [],
+        "model_calls": 30,
+        "avg_input_tokens": 418
+      },
+      "0.45": {
+        "answer_accuracy": 0.966,
+        "refusal_accuracy": 1,
+        "false_refusals": [
+          "q24"
+        ],
+        "wrong_or_unrefused": [],
+        "model_calls": 30,
+        "avg_input_tokens": 412
+      },
+      "0.50": {
+        "answer_accuracy": 0.966,
+        "refusal_accuracy": 1,
+        "false_refusals": [
+          "q24"
+        ],
+        "wrong_or_unrefused": [],
+        "model_calls": 30,
+        "avg_input_tokens": 378
+      },
+      "0.55": {
+        "answer_accuracy": 0.897,
+        "refusal_accuracy": 1,
+        "false_refusals": [
+          "q06",
+          "q09",
+          "q24"
+        ],
+        "wrong_or_unrefused": [],
+        "model_calls": 29,
+        "avg_input_tokens": 314
+      },
+      "0.60": {
+        "answer_accuracy": 0.759,
+        "refusal_accuracy": 1,
+        "false_refusals": [
+          "q06",
+          "q09",
+          "q10",
+          "q12",
+          "q14",
+          "q16",
+          "q24"
+        ],
+        "wrong_or_unrefused": [],
+        "model_calls": 26,
+        "avg_input_tokens": 248
+      },
+      "0.65": {
+        "answer_accuracy": 0.621,
+        "refusal_accuracy": 1,
+        "false_refusals": [
+          "q04",
+          "q06",
+          "q09",
+          "q10",
+          "q11",
+          "q12",
+          "q14",
+          "q16",
+          "q24",
+          "q25",
+          "q28"
+        ],
+        "wrong_or_unrefused": [],
+        "model_calls": 18,
+        "avg_input_tokens": 226
+      }
+    }
+  },
+  "best": {
+    "strategy": "sections_contextual",
+    "floor": 0.3,
+    "answer_accuracy": 0.966,
+    "refusal_accuracy": 1,
+    "false_refusals": [
+      "q24"
+    ],
+    "wrong_or_unrefused": [],
+    "model_calls": 30,
+    "avg_input_tokens": 422
+  }
+}

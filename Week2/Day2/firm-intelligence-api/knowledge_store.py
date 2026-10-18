@@ -1,67 +1,35 @@
 # embed_text is imported rather than rewritten
 # embedding provider has not changed , only where the vectors get stored
+import knowledge
+import chunk_index
+import hybrid
 
-import chromadb
-from documents import DOCUMENTS
-from knowledge import embed_texts
+# our chosen chunking startegy
+CHUNK_STARTEGY = "sections_contextual"
+SEARCH_MODE = "hybrid"
 
-chroma = chromadb.PersistentClient(path="./chroma_store")
-# HNSW (Hierarchical Navigable Small World) is a graph based index to perform approximate nearest neighbor (ANN) search.
-collection = chroma.get_or_create_collection(
-    name="firm_documents",
-    configuration={"hnsw": {"space": "cosine"}},
-)
 
 def count()->int:
-    return collection.count()
+    return chunk_index.collection_for(CHUNK_STARTEGY).count()
 
 def build_index() -> int:
     """
-    Embed every document and hand the vectors to chroma.
+    Chunk and embed the corpus .... free if nothing has changed since the last build.
     """
-
-    texts = [doc["body"] for doc in DOCUMENTS]
-    vectors, tokens = embed_texts(texts, input_type="document")
-    collection.upsert(
-        ids=[doc["id"] for doc in DOCUMENTS],
-        embeddings=vectors,
-        documents=texts,
-        metadatas=[{"title": doc["title"], "type": doc["type"]} for doc in DOCUMENTS],
-    )
-    return tokens
+    return chunk_index.build(CHUNK_STARTEGY)["embedding_tokens"]
 
 
 def search(question: str, top_k: int = 3) -> list:
     """
     Embed the question and let chroma do the storing.
     """
-    if collection.count() == 0:
-      raise RuntimeError("Index empty, build it via POST /knowledge/index")
-    
-    query_vector, _ = embed_texts(question, input_type="query")
-    result = collection.query(query_embeddings=query_vector, n_results=top_k)
-    return [
-        {
-            "id": doc_id,
-            "title": metadata["title"],
-            "text": text,
-            # chroma will give us back the distance ... lower is closer
-            # we will do 1 - distance in order to flip from return distance , to similarity
-            "score": 1 - distance,
-        }
-        for doc_id, text, metadata, distance in zip(
-            result["ids"][0],
-            result["documents"][0],
-            result["metadatas"][0],
-            result["distances"][0],
-        )
-    ]
+    if count() == 0:
+      raise RuntimeError("Index is empty, call POST /knowledge/index first")
 
-# things to note:
-# embed_texts is imported not rewritten ... embedding provider has not changed only the storage has
-# configuration=.... -> not optional , we are choosing something different from default 
-# chroma returns distance, we return similarity
-    # in chroma lower is better 
-    # in our implementation higher is better
-    # 1 - distance converts  it to similarity
-# upsert instead of add -> add fails on an id that already exists, upsert overwrites
+    query_vectors, _ = knowledge.embed_texts(question, input_type="query")
+
+    if SEARCH_MODE == "hybrid":
+        return hybrid.search_with_vector(CHUNK_STARTEGY, question, query_vectors[0], top_k)
+    
+    return chunk_index.search_with_vectors(CHUNK_STARTEGY, query_vectors, k=top_k)[0]
+

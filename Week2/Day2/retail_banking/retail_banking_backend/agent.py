@@ -88,6 +88,14 @@ def ask_with_tools(question: str) -> dict:
 
 def _execute_tool(name: str, tool_input: dict) -> tuple[str, bool]:
     """Run the requested tool. Returns (result_text, is_error)."""
+    if name == "get_complaint":
+        cid = tool_input.get("complaint_id")
+        if cid is None:
+            return 'Error: missing "complaint_id"', True
+        result = agent_tools.get_complaint(cid)
+        is_error = "error" in result
+        return json.dumps(result, default=str), is_error
+
     if name == "search_knowledge_base":
         if "query" not in tool_input:
             return 'Error: missing required field "query"', True
