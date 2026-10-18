@@ -54,12 +54,11 @@ DOCUMENTS: list[dict[str, Any]] = [
             "consequential interest. Where arrears have been reported to a "
             "credit reference agency in error, the record must be amended "
             "within fifteen business days and the customer notified. Where "
-            "distress and inconvenience is evidenced, a payment in the range "
-            "of one hundred to five hundred pounds may be offered, with the "
-            "specific figure determined by the severity matrix in appendix A. "
-            "Amounts outside that range require sign-off from the Head of "
-            "Conduct. Redress figures must never be quoted to a customer "
-            "before the calculation has been reviewed by a second handler."
+            "distress and inconvenience is evidenced, a payment may be offered "
+            "at a level determined by the severity matrix in appendix A. "
+            "Amounts above the upper band of that matrix require sign-off from "
+            "the Head of Conduct. Redress figures must never be quoted to a "
+            "customer before the calculation has been reviewed by a second handler."
         ),
     },
     {
@@ -74,9 +73,9 @@ DOCUMENTS: list[dict[str, Any]] = [
             "reworked on the basis of the rate the customer was entitled to "
             "expect. Over-limit and late payment fees are refunded where the "
             "underlying cause is attributable to the bank. Goodwill payments "
-            "outside these categories are permitted up to one hundred and "
-            "fifty pounds per complaint at handler discretion; above that "
-            "figure, team leader approval is required."
+            "outside these categories are permitted up to the discretionary "
+            "threshold per complaint at handler discretion; above that "
+            "threshold, team leader approval is required."
         ),
     },
     {
@@ -90,10 +89,11 @@ DOCUMENTS: list[dict[str, Any]] = [
             "by the bank but not applied to the account in time, and a late "
             "payment fee was charged. The Ombudsman upheld the complaint and "
             "directed the bank to refund the fee, remove the late marker from "
-            "the customer's credit file and pay one hundred and fifty pounds "
-            "for distress and inconvenience. The decision notes that the fault "
-            "was operational and that the customer had done everything a "
-            "reasonable person could be expected to do."
+            "the customer's credit file and pay a modest distress and "
+            "inconvenience award consistent with the lower band of the redress "
+            "methodology. The decision notes that the fault was operational "
+            "and that the customer had done everything a reasonable person "
+            "could be expected to do."
         ),
     },
     {
@@ -231,8 +231,8 @@ DOCUMENTS: list[dict[str, Any]] = [
             "credit reference agencies in respect of the payments covered by "
             "that agreement. The Ombudsman upheld the complaint and directed "
             "the bank to correct the credit file within fifteen business days, "
-            "issue a written apology and pay three hundred pounds for "
-            "distress and inconvenience. The decision was critical of the "
+            "issue a written apology and pay a distress and inconvenience award "
+            "in the mid band of the redress methodology. The decision was critical of the "
             "time the customer had spent chasing the correction, noting that "
             "the underlying error should have been resolved on first contact."
         ),
@@ -248,9 +248,9 @@ DOCUMENTS: list[dict[str, Any]] = [
             "having provided probate documentation on two occasions. The "
             "Ombudsman upheld the complaint. The bank was directed to release "
             "funds immediately, refund any fees and interest incurred as a "
-            "consequence of the delay and pay five hundred pounds in "
-            "recognition of the significant distress caused during a period "
-            "of bereavement. The decision emphasised the bank's obligation "
+            "consequence of the delay and pay a distress award at the upper "
+            "band of the redress methodology in recognition of the significant "
+            "distress caused during a period of bereavement. The decision emphasised the bank's obligation "
             "under the Vulnerable Customers Standard to prioritise such cases."
         ),
     },
@@ -310,7 +310,8 @@ DOCUMENTS: list[dict[str, Any]] = [
             "CRM code did not apply. The complaint was upheld. The bank was "
             "directed to reimburse the disputed amount in full, pay interest "
             "at eight per cent simple from the date of the payment and pay "
-            "two hundred pounds for distress and inconvenience. The decision "
+            "a distress and inconvenience award consistent with the redress "
+            "methodology. The decision "
             "noted that the second-handler review required before decline had "
             "not been evidenced in the bank's file."
         ),
