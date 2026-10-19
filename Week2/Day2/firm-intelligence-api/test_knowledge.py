@@ -2,7 +2,7 @@
 
 from fastapi.testclient import TestClient
 
-import knowledge_store as knowledge   # the SAME module the router uses
+import knowledge_store as knowledge  # the SAME module the router uses
 import llm
 from main import app
 

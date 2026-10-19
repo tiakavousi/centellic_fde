@@ -1,7 +1,8 @@
 from typing import Any
 
+import anthropic
 import llm
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import StreamingResponse
 from llm import generate, stream
 from prompts.prompts import (
@@ -17,7 +18,12 @@ router = APIRouter(prefix="/complaints", tags=["insights"])
 
 @router.post("/{complaint_id}/summary")
 def generate_complaint_summary(complaint= Depends(get_complaint_or_404)) -> dict[str, Any]:
-    complaint_summary = generate(SYSTEM_PROMPT, build_complaint_summary_user_prompt(complaint))
+    try:
+        complaint_summary = generate(SYSTEM_PROMPT, build_complaint_summary_user_prompt(complaint))
+    except anthropic.RateLimitError:
+        raise HTTPException(status_code=429, detail="Rate limit exceeded")
+    except anthropic.APITimeoutError:
+        raise HTTPException(status_code=504, detail="LLM request timed out")
     return {
         "id": complaint["id"],
         "customer_id": complaint["customer_id"],

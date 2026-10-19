@@ -1,13 +1,14 @@
+import logging
 import os
 from collections.abc import Iterator
 from functools import lru_cache
 from typing import Any
-import logging
 
 import anthropic
-import config  # noqa: F401 — loads .env.local
 from fastapi import HTTPException
 from pydantic import BaseModel, ValidationError
+
+import config  # noqa: F401 — loads .env.local
 
 MODEL = os.environ["ANTHROPIC_MODEL"]
 ANTHROPIC_API_KEY = os.environ["ANTHROPIC_API_KEY"]
@@ -106,6 +107,14 @@ def generate_structured(system: str, user: str, response_model: type[BaseModel],
         "output_tokens": response.usage.output_tokens,
         "stop_reason": response.stop_reason,
     }
+
+def estimate_input_tokens(system: str, user: str) -> int:
+    """Count tokens for a system+user prompt without calling the model."""
+    return get_client().messages.count_tokens(
+        model=MODEL,
+        system=system,
+        messages=[{"role": "user", "content": user}],
+    ).input_tokens
 
 def generate_with_tools(
       system: str,
