@@ -22,6 +22,8 @@ chroma_store/
 
 # Test & coverage
 .pytest_cache/
+tests/.pytest_cache/
+tests/test-path/
 .coverage
 htmlcov/
 

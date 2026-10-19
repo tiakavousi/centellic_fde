@@ -108,6 +108,14 @@ def generate_structured(system: str, user: str, response_model: type[BaseModel],
         "stop_reason": response.stop_reason,
     }
 
+def estimate_input_tokens(system: str, user: str) -> int:
+    """Count tokens for a system+user prompt without calling the model."""
+    return get_client().messages.count_tokens(
+        model=MODEL,
+        system=system,
+        messages=[{"role": "user", "content": user}],
+    ).input_tokens
+
 def generate_with_tools(
       system: str,
       messages: list[dict],
