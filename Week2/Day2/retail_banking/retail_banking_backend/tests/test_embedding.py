@@ -1,6 +1,8 @@
+import pytest
 from embedding import embed_texts
 
 
+@pytest.mark.integration
 def test_embed_texts_returns_vector()->None:
     """
     Build the embedding and assert the result.

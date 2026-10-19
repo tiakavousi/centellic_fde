@@ -1,13 +1,14 @@
+import logging
 import os
 from collections.abc import Iterator
 from functools import lru_cache
 from typing import Any
-import logging
 
 import anthropic
-import config  # noqa: F401 — loads .env.local
 from fastapi import HTTPException
 from pydantic import BaseModel, ValidationError
+
+import config  # noqa: F401 — loads .env.local
 
 MODEL = os.environ["ANTHROPIC_MODEL"]
 ANTHROPIC_API_KEY = os.environ["ANTHROPIC_API_KEY"]

@@ -1,6 +1,7 @@
 import os
 
 import chromadb
+
 import config
 from data.documents import DOCUMENTS
 from embedding import embed_texts
