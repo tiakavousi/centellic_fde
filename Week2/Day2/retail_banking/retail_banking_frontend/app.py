@@ -1,3 +1,4 @@
+import json
 import os
 import requests
 import streamlit as st
@@ -6,76 +7,14 @@ BACKEND_URL = os.environ.get("BACKEND_URL", "http://localhost:8000")
 
 st.set_page_config(page_title="Retail Banking UI", layout="wide")
 
+_css_path = os.path.join(os.path.dirname(__file__), "style.css")
+with open(_css_path) as _f:
+    st.markdown(f"<style>{_f.read()}</style>", unsafe_allow_html=True)
+
 st.markdown(
-    """
-    <style>
-    /* dark gray gradient background */
-    .stApp {
-        background: linear-gradient(135deg, #1f2328 0%, #2b2f36 50%, #3a3f47 100%);
-        color: #e6e6e6;
-    }
-    [data-testid="stHeader"] { background: transparent; }
-
-    /* buttons: dark blue with 0.5 opacity (was red) */
-    .stButton > button {
-        background-color: rgba(30, 64, 175, 0.5);
-        color: #ffffff;
-        border: 1px solid rgba(30, 64, 175, 0.8);
-        font-weight: 600;
-    }
-    .stButton > button:hover {
-        background-color: rgba(30, 64, 175, 0.75);
-        border-color: #1e40af;
-        color: #ffffff;
-    }
-    .stButton > button:focus:not(:active) {
-        box-shadow: 0 0 0 0.2rem rgba(30, 64, 175, 0.35);
-        color: #ffffff;
-    }
-
-    /* tabs: no red underline; hover + bolder on active */
-    .stTabs [data-baseweb="tab-list"] {
-        border-bottom: 1px solid rgba(255,255,255,0.1);
-        gap: 48px;
-    }
-    .stTabs [data-baseweb="tab"] {
-        font-weight: 500;
-        color: #d0d4da;
-        margin-right: 32px;
-        padding: 0 8px;
-        transform-origin: left center;
-        transition: color 0.2s ease, font-weight 0.2s ease, transform 0.2s ease;
-    }
-    .stTabs [data-baseweb="tab"]:hover {
-        color: #ffffff;
-        font-weight: 700;
-        transform: scale(1.1);
-    }
-    .stTabs [aria-selected="true"] {
-        color: #ffffff !important;
-        font-weight: 800 !important;
-    }
-    .stTabs [data-baseweb="tab-highlight"],
-    .stTabs [data-baseweb="tab-border"] {
-        background-color: transparent !important;
-    }
-
-    /* JSON viewer: recolor orange keys to light gray */
-    [data-testid="stJson"],
-    [data-testid="stJson"] * {
-        color: #d1d5db !important;
-    }
-    [data-testid="stJson"] .object-key,
-    [data-testid="stJson"] .object-key span {
-        color: #d1d5db !important;
-    }
-    </style>
-    """,
+    '<div class="app-header"><h1>Retail Banking</h1></div>',
     unsafe_allow_html=True,
 )
-
-st.title("Retail Banking")
-st.caption(f"Backend: {BACKEND_URL}")
 
 
 def call(method, path, *, params=None, json=None, timeout=15):
@@ -125,13 +64,21 @@ tab1, tab2, tab3 = st.tabs([
 with tab1:
     st.subheader("Search Knowledge Base")
     query = st.text_input("Query", key="kb_query")
-    top_k = st.number_input("top_k", min_value=1, max_value=50, value=3, step=1, key="kb_topk")
+    top_k_raw = st.text_input("top_k", value="3", key="kb_topk")
     if st.button("Search", key="kb_btn"):
         if not query.strip():
             st.warning("Please enter a query.")
         else:
-            data = call("GET", "/knowledge/search",
-                        params={"query": query, "top_k": int(top_k)}, timeout=15)
+            try:
+                top_k = int(top_k_raw)
+                if top_k < 1:
+                    raise ValueError
+            except ValueError:
+                st.warning("top_k must be a positive integer.")
+                top_k = None
+            if top_k is not None:
+                data = call("GET", "/knowledge/search",
+                        params={"query": query, "top_k": top_k}, timeout=15)
             if data is not None:
                 hits = data.get("hits", data if isinstance(data, list) else [])
                 if not hits:
@@ -150,20 +97,30 @@ with tab1:
                         })
                     st.dataframe(rows, use_container_width=True)
                 with st.expander("Raw response"):
-                    st.json(data)
+                    st.code(json.dumps(data, indent=2, default=str), language="json")
 
 with tab2:
     st.subheader("LLM Generating Complaint Summary")
-    cid = st.number_input("complaint_id", min_value=1, value=1, step=1, key="sum_cid")
+    cid_raw = st.text_input("complaint_id", value="1", key="sum_cid")
     if st.button("Generate summary", key="sum_btn"):
-        data = call("POST", f"/complaints/{int(cid)}/summary", timeout=60)
+        try:
+            cid = int(cid_raw)
+            if cid < 1:
+                raise ValueError
+        except ValueError:
+            st.warning("complaint_id must be a positive integer.")
+            cid = None
+        if cid is None:
+            pass
+        else:
+            data = call("POST", f"/complaints/{cid}/summary", timeout=60)
         if data is not None:
             summary = data.get("summary") or data.get("text")
             if summary:
                 st.markdown(summary)
             render_tokens(data if isinstance(data, dict) else {})
             with st.expander("Raw response"):
-                st.json(data)
+                st.code(json.dumps(data, indent=2, default=str), language="json")
 
 with tab3:
     st.subheader("Ask Agent")
@@ -184,4 +141,19 @@ with tab3:
                 c3.metric("stop_reason", str(data.get("stop_reason", "—")))
                 render_tokens(data)
                 with st.expander("Raw response"):
-                    st.json(data)
+                    st.code(json.dumps(data, indent=2, default=str), language="json")
+
+st.markdown(
+    f"""
+    <div class="app-footer">
+        A complaint handler and conduct-risk assistant for UK retail banking.
+        Search the policy and ombudsman knowledge base, generate structured summaries of individual complaints,
+        or ask the agent a free-text question — it will search documents, check SLA status and surface
+        similar historic cases to ground its recommendation.
+        The assistant never states a redress amount, never closes a complaint, and refuses when no
+        relevant source clears the relevance floor.
+        <span class="app-footer-backend">Backend: {BACKEND_URL}</span>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)

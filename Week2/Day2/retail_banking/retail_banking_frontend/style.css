@@ -1,0 +1,127 @@
+:root {
+    --blue-primary:     rgba(30, 64, 175, 0.5);
+    --blue-border:      rgba(30, 64, 175, 0.8);
+    --blue-hover:       rgba(30, 64, 175, 0.75);
+    --blue-focus-ring:  rgba(30, 64, 175, 0.35);
+    --blue-light:       #93c5fd;
+    --bg-gradient:      linear-gradient(135deg, #1f2328 0%, #2b2f36 50%, #3a3f47 100%);
+    --text-primary:     #e6e6e6;
+    --text-muted:       #d0d4da;
+    --text-json:        #d1d5db;
+    --text-white:       var(--text-white);
+    --divider:          rgba(255, 255, 255, 0.1);
+    --fw-normal:        500;
+    --fw-bold:          600;
+    --fw-bolder:        700;
+    --fw-boldest:       800;
+}
+
+.stApp {
+    background: var(--bg-gradient);
+    color: var(--text-primary);
+}
+[data-testid="stHeader"] { background: transparent; }
+
+.app-header {
+    padding: 1.5rem 0 1rem 0;
+    border-bottom: 1px solid var(--divider);
+    margin-bottom: 1.5rem;
+}
+.app-header h1 {
+    color: var(--text-white);
+    font-weight: var(--fw-boldest);
+    margin: 0;
+}
+
+.stTabs [data-baseweb="tab-panel"] {
+    min-height: 520px;
+}
+
+.app-footer {
+    margin-top: 3rem;
+    padding: 1.25rem 0;
+    border-top: 1px solid var(--divider);
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    line-height: 1.6;
+}
+.app-footer-backend {
+    display: block;
+    margin-top: 0.5rem;
+    font-size: 0.75rem;
+    opacity: 0.6;
+}
+
+.stButton > button {
+    background-color: var(--blue-primary);
+    color: var(--text-white);
+    border: 1px solid var(--blue-border);
+    font-weight: var(--fw-bold);
+}
+.stButton > button:hover {
+    background-color: var(--blue-hover);
+    border-color: var(--blue-light);
+    color: var(--text-white);
+}
+.stButton > button:focus:not(:active) {
+    box-shadow: 0 0 0 0.2rem var(--blue-focus-ring);
+    color: var(--text-white);
+}
+
+.stTabs [data-baseweb="tab-list"] {
+    border-bottom: 1px solid var(--divider);
+    gap: 48px;
+}
+.stTabs [data-baseweb="tab"] {
+    font-weight: var(--fw-normal);
+    color: var(--text-muted);
+    margin-right: 32px;
+    padding: 0 8px;
+    transform-origin: left center;
+    transition: color 0.2s ease, font-weight 0.2s ease, transform 0.2s ease;
+}
+.stTabs [data-baseweb="tab"]:hover {
+    color: var(--blue-light);
+    font-weight: var(--fw-bolder);
+    transform: scale(1.1);
+}
+.stTabs [aria-selected="true"] {
+    color: var(--text-white) !important;
+    font-weight: var(--fw-boldest) !important;
+    background-color: var(--blue-hover) !important;
+    border-radius: 6px;
+}
+.stTabs [data-baseweb="tab-highlight"],
+.stTabs [data-baseweb="tab-border"] {
+    background-color: transparent !important;
+}
+
+[data-testid="stJson"],
+[data-testid="stJson"] * {
+    color: var(--text-json) !important;
+}
+[data-testid="stJson"] .object-key,
+[data-testid="stJson"] .object-key span {
+    color: var(--text-json) !important;
+}
+
+[data-testid="stExpander"]:hover {
+    border-color: var(--blue-border) !important;
+}
+[data-testid="stExpander"] summary:hover {
+    color: var(--blue-light) !important;
+}
+
+input:focus, textarea:focus {
+    outline: none !important;
+    box-shadow: none !important;
+}
+[data-baseweb="input"]:focus-within,
+[data-baseweb="textarea"]:focus-within,
+[data-baseweb="base-input"]:focus-within,
+[data-testid="stNumberInput"] [data-baseweb="input"]:focus-within,
+[data-testid="stTextInput"] [data-baseweb="input"]:focus-within,
+[data-testid="stTextArea"] [data-baseweb="textarea"]:focus-within {
+    border-color: var(--blue-light) !important;
+    box-shadow: 0 0 0 1px var(--blue-light) !important;
+}
