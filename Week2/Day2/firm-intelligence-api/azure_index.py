@@ -60,8 +60,8 @@ def index_definition(name: str) -> SearchIndex:
         SearchableField(name="title", type=SearchFieldDataType.String),
         SearchableField(name="text", type=SearchFieldDataType.String),
         SearchField(
-            name="embedding", 
-            type=SearchFieldDataType.type.Collection(SearchFieldDataType.Single),
+            name="embedding",
+            type=SearchFieldDataType.Collection(SearchFieldDataType.Single),
             searchable=True,
             vector_search_dimensions=DIMENTIONS,
             vector_search_profile_name=VECTOR_PROFILE,
@@ -76,9 +76,9 @@ def index_definition(name: str) -> SearchIndex:
     # part 3 - SemanticSearch (re-ranks results using language understanding)
     semantic_search = SemanticSearch(configurations=[SemanticConfiguration(
         name=settings.SEMANTIC_CONFIG,
-        proiritized_fields=SemanticPrioritizedFields(
-            title_fields=SemanticField(field_name="title"),
-            content_field=[SemanticField(field_name="text")],
+        prioritized_fields=SemanticPrioritizedFields(
+            title_field=SemanticField(field_name="title"),
+            content_fields=[SemanticField(field_name="text")],
         )
     )])
 

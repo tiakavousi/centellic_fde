@@ -26,5 +26,5 @@ def ask_agent_with_tools(query:AgentQuestion) -> ToolUseResponse:
             raise HTTPException(status_code=429, detail="LLM rate limit exceeded")
     except APITimeoutError:
         raise HTTPException(status_code=504, detail="LLM request timed out")
-    except APIStatusError:
-        raise HTTPException(status_code=502, detail="Failed to generate the response")
+    except APIStatusError as e:
+        raise HTTPException(status_code=502, detail=str(e))
