@@ -33,3 +33,6 @@ TOP_K: int = int(os.environ.get("TOP_K", "3"))
 # --- SLA policy ---
 ACK_WINDOW_DAYS: int = int(os.environ.get("ACK_WINDOW_DAYS", "3"))
 RESPONSE_WINDOW_DAYS: int = int(os.environ.get("RESPONSE_WINDOW_DAYS", "56"))
+
+# --- Refusal Sentence ---
+REFUSAL_SENTENCE = "The provided documents do not answer that question."

@@ -1,6 +1,5 @@
 from typing import Any
-
-REFUSAL_SENTENCE = "The provided documents do not answer that question."
+from settings import REFUSAL_SENTENCE
 
 GROUNDED_SYSTEM_PROMPT = (
     "You are a complaints and conduct analyst at a UK retail bank. "
