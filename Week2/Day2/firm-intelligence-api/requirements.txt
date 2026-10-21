@@ -9,3 +9,6 @@ python-dotenv
 anthropic
 azure-search-documents==12.0.0
 azure-identity==1.26.0
+langchain==1.4.6 
+langgraph==1.2.16 
+langchain-anthropic==1.7.6
