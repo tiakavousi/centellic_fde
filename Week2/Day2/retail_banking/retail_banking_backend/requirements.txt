@@ -5,5 +5,7 @@ mypy
 pytest
 voyageai
 chromadb
+azure-search-documents
+azure-identity
 python-dotenv
 anthropic
