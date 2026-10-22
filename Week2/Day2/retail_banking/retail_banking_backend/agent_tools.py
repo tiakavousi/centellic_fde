@@ -1,7 +1,6 @@
-import os
 from datetime import date
 
-import config  # noqa: F401 — loads .env.local
+import settings
 import knowledge_store
 from data.complaints import COMPLAINTS, get_complaint as get_complaint_record
 from data.customers import get_customer  # used by get_complaint and find_similar_complaints
@@ -24,14 +23,9 @@ from data.enums import ProductType
 MAX_SIMILAR_RESULTS = 10
 DEFAULT_SIMILAR_RESULTS = 5
 
-RELEVANCE_FLOOR = float(os.environ["RELEVANCE_FLOOR"])
-
-# ACK_WINDOW_DAYS is the number of days the bank has to send an initial 
-# acknowledgement to the customer after a complaint is received.
-ACK_WINDOW_DAYS = int(os.environ.get("ACK_WINDOW_DAYS", "3"))
-
-# maximum number of days the bank has to send a final response to the customer resolving the complaint.
-RESPONSE_WINDOW_DAYS = int(os.environ.get("RESPONSE_WINDOW_DAYS", "56"))
+RELEVANCE_FLOOR = settings.RELEVANCE_FLOOR
+ACK_WINDOW_DAYS = settings.ACK_WINDOW_DAYS
+RESPONSE_WINDOW_DAYS = settings.RESPONSE_WINDOW_DAYS
 
 SEARCH_TOOLS = [
     {

@@ -1,6 +1,5 @@
 from agent import ask_with_tools
-from anthropic import APIStatusError, APITimeoutError, RateLimitError
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter
 from pydantic import BaseModel, Field
 
 router = APIRouter(prefix="/agent", tags=["agent"])

@@ -1,19 +1,13 @@
-import os
-
 import chromadb
 
-import config
+import settings
 from data.documents import DOCUMENTS
 from embedding import embed_texts
 
-CHROMA_PATH = os.environ["CHROMA_PATH"]
-CHROMA_COLLECTION = os.environ["CHROMA_COLLECTION"]
-TOP_K = int(os.environ["TOP_K"])
-
-chroma = chromadb.PersistentClient(path=CHROMA_PATH)
+chroma = chromadb.PersistentClient(path=settings.CHROMA_PATH)
 
 collection = chroma.get_or_create_collection(
-    name=CHROMA_COLLECTION,
+    name=settings.CHROMA_COLLECTION,
     metadata={"hnsw:space": "cosine"},
 )
 
@@ -34,7 +28,7 @@ def build_index()->int:
     )
     return tokens
 
-def search(query: str, top_k:int = TOP_K) -> list[dict]:
+def search(query: str, top_k:int = settings.TOP_K) -> list[dict]:
     if collection.count() == 0:
         raise RuntimeError("Index empty, build it via POST /knowledge/index")
 

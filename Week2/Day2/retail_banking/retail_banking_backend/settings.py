@@ -19,6 +19,7 @@ VOYAGE_MODEL: str = os.environ["VOYAGE_MODEL"]
 
 # --- Chroma (eval pipeline only) ---
 CHROMA_PATH: str = os.environ.get("CHROMA_PATH", "./chroma_store")
+CHROMA_COLLECTION: str = os.environ.get("CHROMA_COLLECTION", "retail_banking_docs")
 
 # --- Azure AI Search (live API) ---
 AZURE_SEARCH_ENDPOINT: str = os.environ.get("AZURE_SEARCH_ENDPOINT", "")

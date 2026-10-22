@@ -1,12 +1,8 @@
-import os
 from fastapi import APIRouter, HTTPException
 from knowledge_store import build_index, count, search
-from pydantic import BaseModel, Field
 import llm
+import settings
 from prompts.prompts import build_grounded_user_prompt, GROUNDED_SYSTEM_PROMPT
-
-TOP_K = int(os.environ["TOP_K"])
-RELEVANCE_FLOOR = float(os.environ["RELEVANCE_FLOOR"])
 
 router = APIRouter(prefix="/knowledge", tags=["knowledge"])
 
@@ -19,20 +15,20 @@ def generate_indexes():
     }
 
 @router.get("/search")
-def search_quary(query: str, top_k: int = TOP_K):
+def search_quary(query: str, top_k: int = settings.TOP_K):
     try:
         return {"hits": search(query, top_k), "top_k": top_k}
     except RuntimeError as e:
         raise HTTPException(status_code=409, detail=str(e))
 
 @router.post("/ask")
-def ask_question(query: str, top_k: int = TOP_K):
+def ask_question(query: str, top_k: int = settings.TOP_K):
     try:
         hits = search(query, top_k)
     except RuntimeError as e:
         raise HTTPException(status_code=409, detail=str(e))
     
-    usable = [hit for hit in hits if hit['score'] >= RELEVANCE_FLOOR]
+    usable = [hit for hit in hits if hit['score'] >= settings.RELEVANCE_FLOOR]
 
     if not usable:
         return {
