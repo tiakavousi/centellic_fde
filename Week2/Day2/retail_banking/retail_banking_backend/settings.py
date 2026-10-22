@@ -16,14 +16,14 @@ MODEL_TIMEOUT: float = float(os.environ["MODEL_TIMEOUT"])
 # --- Voyage AI ---
 VOYAGEAI_API_KEY: str = os.environ["VOYAGEAI_API_KEY"]
 VOYAGE_MODEL: str = os.environ["VOYAGE_MODEL"]
+EMBEDDING_DIMENSIONS: int = 512  # voyage-3-lite produces 512 floats per text
 
 # --- Chroma (eval pipeline only) ---
 CHROMA_PATH: str = os.environ.get("CHROMA_PATH", "./chroma_store")
 CHROMA_COLLECTION: str = os.environ.get("CHROMA_COLLECTION", "retail_banking_docs")
 
-# --- Azure AI Search (live API) ---
+# --- Azure AI Search (live API) — auth via DefaultAzureCredential (az login) ---
 AZURE_SEARCH_ENDPOINT: str = os.environ.get("AZURE_SEARCH_ENDPOINT", "")
-AZURE_SEARCH_KEY: str = os.environ.get("AZURE_SEARCH_KEY", "")
 AZURE_SEARCH_INDEX: str = os.environ.get("AZURE_SEARCH_INDEX", "retail-banking-chunks")
 AZURE_SEMANTIC_CONFIG: str = os.environ.get("AZURE_SEMANTIC_CONFIG", "retail-banking-semantic")
 

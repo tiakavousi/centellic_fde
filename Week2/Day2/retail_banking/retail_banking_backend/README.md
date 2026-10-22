@@ -34,7 +34,6 @@ cp .env.example .env   # then fill in your keys
 | `VOYAGEAI_API_KEY` | Voyage AI embeddings key | yes | `pa-...` |
 | `VOYAGE_MODEL` | Voyage embedding model | yes | `voyage-3` |
 | `AZURE_SEARCH_ENDPOINT` | Azure AI Search service URL | yes | `https://<name>.search.windows.net` |
-| `AZURE_SEARCH_KEY` | Azure AI Search admin key | yes | `...` |
 | `AZURE_SEARCH_INDEX` | Index name | yes | `retail-banking-chunks` |
 | `AZURE_SEMANTIC_CONFIG` | Semantic configuration name | yes | `retail-banking-semantic` |
 | `RELEVANCE_FLOOR` | Minimum reranker score for grounded answers | yes | `1.5` |

@@ -1,54 +1,31 @@
-import chromadb
+import chunk_index
+import embedding
 
-import settings
-from data.documents import DOCUMENTS
-from embedding import embed_texts
+CHUNK_STRATEGY = "sections_contextual"
+SEARCH_BACKEND = "azure"  # "azure" | "chroma"
 
-chroma = chromadb.PersistentClient(path=settings.CHROMA_PATH)
-
-collection = chroma.get_or_create_collection(
-    name=settings.CHROMA_COLLECTION,
-    metadata={"hnsw:space": "cosine"},
-)
 
 def count() -> int:
-    return collection.count()
-
-def build_index()->int:
-    """
-    Embed every document and hand the vectors to chroma.
-    """
-    texts = [doc["body"] for doc in DOCUMENTS]
-    vectors,tokens = embed_texts(texts, input_type="document")
-    collection.upsert(
-        ids=[doc["id"] for doc in DOCUMENTS],
-        embeddings=vectors,
-        documents=texts,
-        metadatas=[{"title": doc["title"], "type": doc["type"]} for doc in DOCUMENTS]
-    )
-    return tokens
-
-def search(query: str, top_k:int = settings.TOP_K) -> list[dict]:
-    if collection.count() == 0:
-        raise RuntimeError("Index empty, build it via POST /knowledge/index")
-
-    vectors, _ = embed_texts([query], input_type="query")
-    result = collection.query(query_embeddings=vectors, n_results=top_k)
-    return [
-        {
-            "id": doc_id,
-            "title": metadata["title"],
-            "body": body,
-            "score": 1 - distance
-        } 
-        for doc_id, body, metadata, distance in zip(
-            result["ids"][0],
-            result["documents"][0],
-            result["metadatas"][0],
-            result["distances"][0],
-        )
-    ]
-    
+    if SEARCH_BACKEND == "azure":
+        import azure_store
+        return azure_store.count()
+    return chunk_index.collection_for(CHUNK_STRATEGY).count()
 
 
-    
+def build_index() -> int:
+    if SEARCH_BACKEND == "azure":
+        raise RuntimeError("The app only reads the Azure index. Build it with python -m azure_build")
+    return chunk_index.build(CHUNK_STRATEGY)["embedding_tokens"]
+
+
+def search(question: str, top_k: int = 3) -> list:
+    if SEARCH_BACKEND == "azure":
+        import azure_store
+        query_vectors, _ = embedding.embed_texts([question], input_type="query")
+        return azure_store.search_with_vector(question, query_vectors[0], top_k)
+
+    if count() == 0:
+        raise RuntimeError("Index is empty, call POST /knowledge/index first")
+
+    query_vectors, _ = embedding.embed_texts([question], input_type="query")
+    return chunk_index.search_with_vectors(CHUNK_STRATEGY, query_vectors, k=top_k)[0]

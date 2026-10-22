@@ -9,8 +9,8 @@ from main import app
 
 client = TestClient(app)
 
-WEAK_HIT = {"id": "doc-001", "title": "some doc", "body": "some text", "score": 0.3}
-STRONG_HIT = {"id": "doc-001", "title": "some doc", "body": "some text", "score": 0.9}
+WEAK_HIT = {"id": "doc-001", "title": "some doc", "text": "some text", "score": 0.3}
+STRONG_HIT = {"id": "doc-001", "title": "some doc", "text": "some text", "score": 0.9}
 FAKE_ANSWER = {"text": "Complaints must be acknowledged within three days [doc-001].",
                 "input_tokens": 400, "output_tokens": 30, "stop_reason": "end_turn"}
 
