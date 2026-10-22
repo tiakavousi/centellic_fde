@@ -27,7 +27,7 @@ AZURE_SEARCH_INDEX: str = os.environ.get("AZURE_SEARCH_INDEX", "retail-banking-c
 AZURE_SEMANTIC_CONFIG: str = os.environ.get("AZURE_SEMANTIC_CONFIG", "retail-banking-semantic")
 
 # --- Retrieval ---
-RELEVANCE_FLOOR: float = float(os.environ.get("RELEVANCE_FLOOR", "0.35"))
+RELEVANCE_FLOOR: float = float(os.environ.get("RELEVANCE_FLOOR", "0.45"))
 TOP_K: int = int(os.environ.get("TOP_K", "3"))
 
 # --- SLA policy ---
