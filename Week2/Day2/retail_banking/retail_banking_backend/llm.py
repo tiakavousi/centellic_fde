@@ -1,5 +1,4 @@
 import logging
-import os
 from collections.abc import Iterator
 from functools import lru_cache
 from typing import Any
@@ -8,13 +7,10 @@ import anthropic
 from fastapi import HTTPException
 from pydantic import BaseModel, ValidationError
 
-import config  # noqa: F401 — loads .env.local
+import settings
 
-MODEL = os.environ["ANTHROPIC_MODEL"]
-ANTHROPIC_API_KEY = os.environ["ANTHROPIC_API_KEY"]
-MAX_TOKENS = int(os.environ["MAX_TOKENS"])
-MAX_RETRIES = int(os.environ["MAX_RETRIES"])
-TIMEOUT = float(os.environ["MODEL_TIMEOUT"])
+MODEL = settings.ANTHROPIC_MODEL
+MAX_TOKENS = settings.MAX_TOKENS
 
 @lru_cache(maxsize=1)
 def get_client() -> anthropic.Anthropic:
@@ -25,9 +21,9 @@ def get_client() -> anthropic.Anthropic:
     Everyone else imports and calls this.
     """
     client = anthropic.Anthropic(
-        api_key = ANTHROPIC_API_KEY,
-        timeout = TIMEOUT,
-        max_retries = MAX_RETRIES
+        api_key=settings.ANTHROPIC_API_KEY,
+        timeout=settings.MODEL_TIMEOUT,
+        max_retries=settings.MAX_RETRIES,
     )
     return client
 
