@@ -46,7 +46,7 @@ def ask_question(query: str, top_k: int = settings.TOP_K):
         "question": query,
         "answer": result["text"],
         "refused": False,
-        "sources": [{"id": h["id"], "title": h["title"], "score": h["score"]} for h in usable],
+        "sources": [{"id": h["id"], "chunk_id": h.get("chunk_id"), "title": h["title"], "score": h["score"]} for h in usable],
         "input_tokens": result["input_tokens"],
         "output_tokens": result["output_tokens"],
     }

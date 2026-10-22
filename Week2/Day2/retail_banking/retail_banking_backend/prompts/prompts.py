@@ -96,5 +96,5 @@ def build_complaint_analysis_user_prompt(
     )
 
 def build_grounded_user_prompt(question: str, hits: list[dict]) -> str:
-      sources = "\n\n".join(f"[{h['id']}] {h['title']}\n{h['body']}" for h in hits)
+      sources = "\n\n".join(f"[{h['id']}] {h['title']}\n{h['text']}" for h in hits)
       return f"Question: {question}\n\nSources\n---\n{sources}\n---"
