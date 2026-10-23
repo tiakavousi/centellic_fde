@@ -29,6 +29,7 @@ AZURE_SEMANTIC_CONFIG: str = os.environ.get("AZURE_SEMANTIC_CONFIG", "retail-ban
 
 # --- Retrieval ---
 RELEVANCE_FLOOR: float = float(os.environ.get("RELEVANCE_FLOOR", "0.45"))
+RERANK_FLOOR: float = float(os.environ.get("RERANK_FLOOR", "1.5"))
 TOP_K: int = int(os.environ.get("TOP_K", "3"))
 
 # --- SLA policy ---
@@ -37,3 +38,6 @@ RESPONSE_WINDOW_DAYS: int = int(os.environ.get("RESPONSE_WINDOW_DAYS", "56"))
 
 # --- Refusal Sentence ---
 REFUSAL_SENTENCE = "The provided documents do not answer that question."
+
+
+EXACT_MATCH_RULE: bool = os.environ.get("EXACT_MATCH_RULE", "true").lower() == "true"

@@ -1,10 +1,3 @@
-from datetime import date
-
-import settings
-import knowledge_store
-from data.complaints import COMPLAINTS, get_complaint as get_complaint_record
-from data.customers import get_customer  # used by get_complaint and find_similar_complaints
-from data.enums import ProductType
 
 """
 ┌──────────────────────────────┬─────────────────────────────────────────────────────────────┐
@@ -20,12 +13,19 @@ from data.enums import ProductType
 └──────────────────────────────┴─────────────────────────────────────────────────────────────┘
 """
 
+from datetime import date
+
+import gate
+import settings
+import knowledge_store
+from data.complaints import COMPLAINTS, get_complaint as get_complaint_record
+from data.customers import get_customer  # used by get_complaint and find_similar_complaints
+from data.enums import ProductType
+
+
 MAX_SIMILAR_RESULTS = 10
 DEFAULT_SIMILAR_RESULTS = 5
 
-RELEVANCE_FLOOR = settings.RELEVANCE_FLOOR
-ACK_WINDOW_DAYS = settings.ACK_WINDOW_DAYS
-RESPONSE_WINDOW_DAYS = settings.RESPONSE_WINDOW_DAYS
 
 SEARCH_TOOLS = [
     {
@@ -144,7 +144,7 @@ def search_knowledge_base(query: str, top_k: int = 3) -> list[dict] | dict:
         {error, detail} if the vector store call failed.
     """
     try:
-        return [d for d in knowledge_store.search(query, top_k) if d["score"] >= RELEVANCE_FLOOR]
+        return [d for d in knowledge_store.search(query, top_k) if gate.is_usable(d)]
     except RuntimeError as e:
         return {"error": "search_failed", "detail": str(e)}
 
@@ -164,11 +164,11 @@ def check_sla_status(complaint_id: int) -> dict:
         "opened_date": complaint["opened_date"],
         "status": complaint["status"],
         "days_elapsed": days_elapsed,
-        "ack_window_days": ACK_WINDOW_DAYS,
-        "response_window_days": RESPONSE_WINDOW_DAYS,
-        "ack_breached": days_elapsed > ACK_WINDOW_DAYS,
-        "response_breached": days_elapsed > RESPONSE_WINDOW_DAYS,
-        "days_until_response_deadline": RESPONSE_WINDOW_DAYS - days_elapsed,
+        "ack_window_days": settings.ACK_WINDOW_DAYS,
+        "response_window_days": settings.RESPONSE_WINDOW_DAYS,
+        "ack_breached": days_elapsed > settings.ACK_WINDOW_DAYS,
+        "response_breached": days_elapsed > settings.RESPONSE_WINDOW_DAYS,
+        "days_until_response_deadline": settings.RESPONSE_WINDOW_DAYS - days_elapsed,
     }
 
 # tool 4
