@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from knowledge_store import build_index, count, search
+import gate
 import llm
 import settings
 from prompts.prompts import build_grounded_user_prompt, GROUNDED_SYSTEM_PROMPT
@@ -28,7 +29,7 @@ def ask_question(query: str, top_k: int = settings.TOP_K):
     except RuntimeError as e:
         raise HTTPException(status_code=409, detail=str(e))
     
-    usable = [hit for hit in hits if hit['score'] >= settings.RELEVANCE_FLOOR]
+    usable = [hit for hit in hits if gate.is_usable(hit)]
 
     if not usable:
         return {
