@@ -9,6 +9,7 @@ from azure.identity import DefaultAzureCredential
 from azure.search.documents import SearchClient
 from azure.search.documents.indexes import SearchIndexClient
 from azure.search.documents.models import VectorizedQuery
+import bm25
 
 CANDIDATES = 50
 
@@ -46,8 +47,19 @@ def index_client() -> SearchIndexClient:
         credential=_credential(),
     )
 
+def _identifiers(text: str) -> set[str]:
+    """
+    Tokens containing a digit (e.g. 3307), same as in hybrid.py
+    """
+    return {
+        token for token in bm25.tokenize(text) if any(char.isdigit() for char in token)
+    }
 
 def count() -> int:
+    """
+    Number of chunks in Azure index, 0 if it does not exist
+     - needs only the query permission.
+    """
     try:
         return search_client().search(
             search_text="*", include_total_count=True, top=0
@@ -57,10 +69,15 @@ def count() -> int:
 
 
 def search_with_vector(
-    question: str, query_vector: list[float], top_k: int = 3, semantic: bool = True
+     question :str, 
+     query_vector: list[float], 
+     top_k: int = 3, 
+     semantic: bool = True
 ) -> list[dict]:
+    search_text = " ".join(bm25.tokenize(question)) or "*"
+
     options = {
-        "search_text": "*",
+        "search_text": search_text,
         "vector_queries": [
             VectorizedQuery(
                 vector=query_vector,
@@ -83,6 +100,7 @@ def search_with_vector(
     if not results:
         raise RuntimeError(NOT_BUILT)
 
+    wanted = _identifiers(question) if settings.EXACT_MATCH_RULE else set()
     hits = []
     for result in results:
         rerank = result.get("@search.reranker_score")
@@ -96,6 +114,7 @@ def search_with_vector(
                 "score": rerank if rerank is not None else fused,
                 "rerank_score": rerank,
                 "rrf": round(fused, 5),
+                "exact_match": bool(wanted & set(bm25.tokenize(result["text"]))),
             }
         )
     return hits

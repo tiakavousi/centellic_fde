@@ -38,3 +38,6 @@ RESPONSE_WINDOW_DAYS: int = int(os.environ.get("RESPONSE_WINDOW_DAYS", "56"))
 
 # --- Refusal Sentence ---
 REFUSAL_SENTENCE = "The provided documents do not answer that question."
+
+
+EXACT_MATCH_RULE: bool = os.environ.get("EXACT_MATCH_RULE", "true").lower() == "true"
