@@ -157,7 +157,7 @@ EVAL_SET = [
 
     {"id": "q27", "question": "Does the FOS require forbearance to be granted once a written request is received?",
      "doc_id": "doc-103", "evidence": "The FOS did not require forbearance to be granted in all cases",
-     "keywords": ["no|not required|did not require"], "kind": "negation"},
+     "keywords": ["no|not require*|did not require"], "kind": "negation"},
 
     # --- doc-104: APP Fraud Policy 2026 (corpus, sectioned) ---
     {"id": "q28", "question": "Does a generic scam warning on the login screen satisfy the specific and effective warning test?",
